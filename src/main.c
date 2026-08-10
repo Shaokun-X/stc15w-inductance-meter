@@ -1,4 +1,3 @@
-#include "STC15Fxxxx.h"
 #include "config.h"
 #include "delay.h"
 #include "GPIO.h"
