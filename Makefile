@@ -209,7 +209,8 @@ DEP_FILE := $(OBJDIR)/dependencies.mk
 
 SRCS := \
 	$(VENDER_DIR)/delay.c \
-	$(VENDER_DIR)/GPIO.c \
+	$(VENDER_DIR)/gpio.c \
+	$(VENDER_DIR)/adc.c \
 	$(SRC_DIR)/main.c
 
 VENDER_SRCS := $(filter $(VENDER_DIR)%, $(SRCS))

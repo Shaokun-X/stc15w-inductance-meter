@@ -1,5 +1,5 @@
 
-#include	"PCA.h"
+#include	"pca.h"
 
 __bit		B_Capture0,B_Capture1,B_Capture2;
 u8		PCA0_mode,PCA1_mode,PCA2_mode;
