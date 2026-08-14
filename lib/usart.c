@@ -224,5 +224,9 @@ void UART2_int (void) __interrupt (UART2_VECTOR)
 
 }
 
-
-
+int putchar(int c)
+{
+    TX1_write2buff(c);
+	TX2_write2buff(c);
+    return c;
+}
