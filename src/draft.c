@@ -18,8 +18,19 @@ enum Range {
     1U_TO_10U,
     10U_TO_100U,
     100U_TO_1M,
-    ABOVE_10,
+    ABOVE_10
 };
+
+enum Mode {
+    MODE_AUTO,
+    MODE_1U_TO_10U,
+    MODE_10U_TO_100U,
+    MODE_100U_TO_1M,
+    MODE_ABOVE_10
+}
+
+volatile Mode mode = MODE_AUTO;
+volatile Range range = RANGE_ABOVE_10;
 
 void main(void)
 {
@@ -81,6 +92,11 @@ unsigned int measure_with_comparator()
 }
 
 unsigned int measure_with_adc()
+{
+
+}
+
+void button_isr()
 {
 
 }
