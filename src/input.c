@@ -1,5 +1,11 @@
 #include "input.h"
 
+volatile enum Mode mode = MODE_AUTO;
+
+static void pca_timer_restart(void);
+static void pca_timer_stop(void);
+static enum Mode cycle_mode(void);
+
 void input_init(void)
 {
     GPIO_InitTypeDef        GPIO_InitStructure;
@@ -33,6 +39,18 @@ void input_init(void)
     PCA_Init(PCA_Counter, &PCA_InitStructure);
 }
 
+static enum Mode cycle_mode(void)
+{
+    mode++;
+
+    if (mode >= MODE_COUNT) {
+        mode = MODE_AUTO;
+    }
+
+    return mode;
+}
+
+
 void int1_isr (void) __interrupt (INT1_VECTOR)		//进中断时已经清除标志
 {
     // rising edge only
@@ -54,18 +72,19 @@ void pca_isr(void) __interrupt (PCA_VECTOR)
         CCAP0H = (u8)(CCAP0_tmp >> 8);
         if (BUTTON_PIN)
         {
-            P32 = !P32;
+            // P32 = !P32;
+            cycle_mode();
             pca_timer_stop();
         }
     }
 }
 
-void pca_timer_stop(void)
+static void pca_timer_stop(void)
 {
     CR = 0;
 }
 
-void pca_timer_restart(void)
+static void pca_timer_restart(void)
 {
     CR = 0;
 

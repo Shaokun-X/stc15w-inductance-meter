@@ -12,14 +12,6 @@
 volatile u16 adc_result;
 volatile bool adc_result_ready;
 
-enum Range {
-    RANGE_BELOW_1U,
-    RANGE_1U_TO_10U,
-    RANGE_10U_TO_100U,
-    RANGE_100U_TO_1M,
-    RANGE_ABOVE_10,
-};
-
 void main(void)
 {
     EA = 0;
@@ -56,7 +48,8 @@ void main(void)
     {
         delay_ms(500);
         // P32 = !P32;
-        log("%d\n", adc_result);
+        // log("%d\n", adc_result);
+        log("%d\n", mode);
         ADC_StartConversion(ADC_CH1);
     }
 }
