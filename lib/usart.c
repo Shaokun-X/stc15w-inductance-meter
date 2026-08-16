@@ -174,8 +174,6 @@ void PrintString(COMx_Define *COMx, u8 *puts)
 }
 */
 
-// ISRs need to be copied to main.c
-
 /********************* UART1中断函数************************/
 // void UART1_int (void) __interrupt (UART1_VECTOR)
 // {

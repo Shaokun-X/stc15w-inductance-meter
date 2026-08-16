@@ -94,8 +94,6 @@ u16	Get_ADC10bitResult(u8 channel)	//channel = 0~7
 }
 
 
-// ISR needs to be copied to main.c
-
 //========================================================================
 // 函数: void ADC_int(void) interrupt ADC_VECTOR
 // 描述: ADC中断函数.
