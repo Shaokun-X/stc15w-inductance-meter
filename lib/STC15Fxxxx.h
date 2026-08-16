@@ -2,6 +2,7 @@
 #define	_STC15Fxxxx_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /*  BYTE Registers  */
 __sfr __at (0x80) P0;
