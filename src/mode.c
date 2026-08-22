@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "exti.h"
 #include "pca.h"
+#include "range.h"
 
 #define PCA_TIMER_HZ    100UL
 #define PCA_TIMER_TICKS ((u16)(MAIN_Fosc / 12UL / PCA_TIMER_HZ)) // PCA_Clock_12T
@@ -20,13 +21,13 @@ void mode_init(void)
 
     GPIO_InitStructure.Pin  = GPIO_Pin_3;
     GPIO_InitStructure.Mode = GPIO_HighZ;
-    GPIO_Inilize(GPIO_P3, &GPIO_InitStructure);
+    GPIO_Init(GPIO_P3, &GPIO_InitStructure);
 
     EXTI_InitTypeDef        EXTI_InitStructure;
     EXTI_InitStructure.EXTI_Mode = EXT_MODE_RiseFall;
-    EXTI_InitStructure.EXTI_Polity = PolityLow;
+    EXTI_InitStructure.EXTI_Polity = PriorityLow;
     EXTI_InitStructure.EXTI_Interrupt = ENABLE;
-    Ext_Inilize(EXT_INT1, &EXTI_InitStructure);
+    Ext_Init(EXT_INT1, &EXTI_InitStructure);
 
     /* Configure PCA0 as a 16-bit software timer. */
     PCA_InitTypeDef         PCA_InitStructure;
@@ -35,7 +36,7 @@ void mode_init(void)
     PCA_InitStructure.PCA_Mode           = PCA_Mode_SoftTimer;
     PCA_InitStructure.PCA_PWM_Wide       = PCA_PWM_8bit; /* Unused */
     PCA_InitStructure.PCA_Interrupt_Mode = ENABLE;
-    PCA_InitStructure.PCA_Polity         = PolityLow;
+    PCA_InitStructure.PCA_Polity         = PriorityLow;
     PCA_InitStructure.PCA_Value          = PCA_TIMER_TICKS;
     PCA_Init(PCA0, &PCA_InitStructure);
     CR = 0;
@@ -53,6 +54,26 @@ static enum Mode cycle_mode(void)
 
     if (mode >= MODE_COUNT) {
         mode = MODE_AUTO;
+    }
+
+    switch (mode) {
+    case MODE_10U_TO_100U:
+        switch_range(RANGE_10U_TO_100U);
+        break;
+    case MODE_100U_TO_1M:
+        switch_range(RANGE_100U_TO_1M);
+        break;
+    case MODE_1M_TO_10M:
+        switch_range(RANGE_1M_TO_10M);
+        break;
+    case MODE_10M_TO_1H:
+        switch_range(RANGE_10M_TO_1H);
+        break;
+    case MODE_AUTO:
+        auto_range();
+        break;
+    default:
+        break;
     }
 
     return mode;

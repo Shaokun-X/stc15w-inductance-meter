@@ -25,7 +25,7 @@ void range_init(void)
 
     GPIO_InitStructure.Pin  = GPIO_Pin_2 | GPIO_Pin_3;
     GPIO_InitStructure.Mode = GPIO_OUT_PP;
-    GPIO_Inilize(GPIO_P1, &GPIO_InitStructure);
+    GPIO_Init(GPIO_P1, &GPIO_InitStructure);
 }
 
 enum Range switch_range(enum Range target)

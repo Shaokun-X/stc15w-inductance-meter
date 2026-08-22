@@ -8,7 +8,7 @@ void debug_init(void)
     GPIO_InitTypeDef        GPIO_InitStructure;
     GPIO_InitStructure.Pin  = GPIO_Pin_0 | GPIO_Pin_1;
     GPIO_InitStructure.Mode = GPIO_PullUp;
-    GPIO_Inilize(GPIO_P3, &GPIO_InitStructure);
+    GPIO_Init(GPIO_P3, &GPIO_InitStructure);
 
     COMx_InitDefine         UART_InitStructure;
     UART_InitStructure.UART_Mode = UART_8bit_BRTx;
@@ -17,8 +17,9 @@ void debug_init(void)
     UART_InitStructure.UART_RxEnable = ENABLE;
     UART_InitStructure.UART_P_SW = UART1_SW_P30_P31;
     UART_InitStructure.UART_Interrupt = ENABLE;   // uart interrupt has to be turned on otherwise the busy flag is never cleared
-    UART_InitStructure.UART_Polity = PolityHigh;      // PolityLow,PolityHigh
-    USART_Configuration(USART1, &UART_InitStructure);
+    UART_InitStructure.UART_Polity = PriorityHigh;      // PriorityLow,PriorityHigh
+	UART_InitStructure.UART_RXD_TXD_Short = DISABLE;
+    USART_Configuration(&UART_InitStructure);
 #endif
 }
 

@@ -33,6 +33,6 @@ typedef struct
 	u8	Pin;		//要设置的端口	
 } GPIO_InitTypeDef;
 
-u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx);
+u8	GPIO_Init(u8 GPIO, GPIO_InitTypeDef *GPIOx);
 
 #endif

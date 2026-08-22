@@ -6,8 +6,7 @@ enum Range {
     RANGE_10U_TO_100U, // comparator range
     RANGE_100U_TO_1M,
     RANGE_1M_TO_10M,
-    RANGE_10M_TO_100M,
-    RANGE_100M_TO_1H,
+    RANGE_10M_TO_1H,
     RANGE_ABOVE_1H, // outbound
     RANGE_COUNT,
 };

@@ -8,8 +8,7 @@ enum Mode {
     MODE_10U_TO_100U,
     MODE_100U_TO_1M,
     MODE_1M_TO_10M,
-    MODE_10M_TO_100M,
-    MODE_100M_TO_1H,
+    MODE_10M_TO_1H,
     MODE_COUNT,
 };
 

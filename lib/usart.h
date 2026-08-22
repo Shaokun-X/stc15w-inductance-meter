@@ -4,10 +4,10 @@
 
 #include	"config.h"
 
-#define	COM_TX1_Lenth	128
-#define	COM_RX1_Lenth	128
-#define	COM_TX2_Lenth	128
-#define	COM_RX2_Lenth	128
+#define	COM_TX1_Lenth	32
+#define	COM_RX1_Lenth	32
+#define	COM_TX2_Lenth	32
+#define	COM_RX2_Lenth	32
 
 #define	USART1	1
 #define	USART2	2
@@ -52,24 +52,33 @@ typedef struct
 	u8	UART_RxEnable;		//允许接收,   ENABLE,DISABLE
 	u8	BaudRateDouble;		//波特率加倍, ENABLE,DISABLE
 	u8	UART_Interrupt;		//中断控制,   ENABLE,DISABLE
-	u8	UART_Polity;		//优先级,     PolityLow,PolityHigh
+	u8	UART_Polity;		//优先级,     PriorityLow,PriorityHigh
 	u8	UART_P_SW;			//切换端口,   UART1_SW_P30_P31,UART1_SW_P36_P37,UART1_SW_P16_P17(必须使用内部时钟)
 	u8	UART_RXD_TXD_Short;	//内部短路RXD与TXD, 做中继, ENABLE,DISABLE
 
 } COMx_InitDefine; 
 
-extern	COMx_Define	COM1,COM2;
+#if STDIO_USART == USART1
+
+extern volatile COMx_Define	COM1;
 extern	u8	__xdata TX1_Buffer[COM_TX1_Lenth];	//发送缓冲
 extern	u8 	__xdata RX1_Buffer[COM_RX1_Lenth];	//接收缓冲
+void TX1_write2buff(u8 dat);	//写入发送缓冲，指针+1
+
+#elif STDIO_USART == USART2
+
+extern volatile COMx_Define COM2;
 extern	u8	__xdata TX2_Buffer[COM_TX2_Lenth];	//发送缓冲
 extern	u8 	__xdata RX2_Buffer[COM_RX2_Lenth];	//接收缓冲
-
-u8	USART_Configuration(u8 UARTx, COMx_InitDefine *COMx);
-void TX1_write2buff(u8 dat);	//写入发送缓冲，指针+1
 void TX2_write2buff(u8 dat);	//写入发送缓冲，指针+1
+
+#else
+#error "STDIO_USART must be USART1 or USART2"
+#endif
+
+u8	USART_Configuration(COMx_InitDefine *COMx);
 
 //void COMx_write2buff(COMx_Define *COMx, u8 dat);	//写入发送缓冲，指针+1
 //void PrintString(COMx_Define *COMx, u8 *puts);
 
 #endif
-

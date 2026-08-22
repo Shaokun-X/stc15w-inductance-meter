@@ -41,13 +41,13 @@
 // }
 
 //========================================================================
-// 函数: u8	Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)
+// 函数: u8	Ext_Init(u8 EXT, EXTI_InitTypeDef *INTx)
 // 描述: 外部中断初始化程序.
 // 参数: INTx: 结构参数,请参考Exti.h里的定义.
 // 返回: 成功返回0, 空操作返回1,错误返回2.
 // 版本: V1.0, 2012-10-22
 //========================================================================
-u8	Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)
+u8	Ext_Init(u8 EXT, EXTI_InitTypeDef *INTx)
 {
 	if(EXT >  EXT_INT4)	return 1;	//空操作
 	
@@ -55,7 +55,7 @@ u8	Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)
 	{
 		if(INTx->EXTI_Interrupt == ENABLE)		EX0 = 1;	//允许中断
 		else									EX0 = 0;	//禁止中断
-		if(INTx->EXTI_Polity == PolityHigh)		PX0 = 1;	//高优先级中断
+		if(INTx->EXTI_Polity == PriorityHigh)		PX0 = 1;	//高优先级中断
 		else									PX0 = 0;	//低优先级中断
 		if(INTx->EXTI_Mode == EXT_MODE_Fall)	IT0 = 1;	//下降沿中断
 		else									IT0 = 0;	//上升,下降沿中断
@@ -66,7 +66,7 @@ u8	Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)
 	{
 		if(INTx->EXTI_Interrupt == ENABLE)		EX1 = 1;	//允许中断
 		else									EX1 = 0;	//禁止中断
-		if(INTx->EXTI_Polity == PolityHigh)		PX1 = 1;	//高优先级中断
+		if(INTx->EXTI_Polity == PriorityHigh)		PX1 = 1;	//高优先级中断
 		else									PX1 = 0;	//低优先级中断
 		if(INTx->EXTI_Mode == EXT_MODE_Fall)	IT1 = 1;	//下降沿中断
 		else									IT1 = 0;	//上升,下降沿中断

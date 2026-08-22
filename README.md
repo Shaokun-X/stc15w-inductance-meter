@@ -1,1 +1,1 @@
-A template project to work with stc15 series chips with sdcc. Library code is converted from the stc official source.
+An inductance meter project based on MCU STC15W408AS.

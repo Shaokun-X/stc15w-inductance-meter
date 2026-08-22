@@ -96,7 +96,7 @@ void	PCA_Init(u8 PCA_id, PCA_InitTypeDef *PCAx)
 		AUXR1 = (AUXR1 & ~(3<<4)) | PCAx->PCA_IoUse;			//切换IO口
 		CMOD  = (CMOD  & ~(7<<1)) | PCAx->PCA_Clock;			//选择时钟源
 		CMOD  = (CMOD  & ~1) | (PCAx->PCA_Interrupt_Mode & 1);	//ECF
-		if(PCAx->PCA_Polity == PolityHigh)		PPCA = 1;	//高优先级中断
+		if(PCAx->PCA_Polity == PriorityHigh)		PPCA = 1;	//高优先级中断
 		else									PPCA = 0;	//低优先级中断
 		CR = 1;
 		return;

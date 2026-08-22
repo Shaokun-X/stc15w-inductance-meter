@@ -174,7 +174,7 @@ endif
 # - EEPROM_SRC if you want to upload data to the MCU's EEPROM.
 
 # Toolchain settings ---------------------------------------------------
-PROJECT_NAME := stc15-template
+PROJECT_NAME := inductance_meter
 VENDER_DIR := lib
 SRC_DIR := src
 
@@ -182,9 +182,9 @@ HAS_DUAL_DPTR := y
 TARGET_ARCH := -mmcs51
 MEMORY_MODEL := --model-medium
 IRAM_SIZE := 256
-XRAM_SIZE := 1024
-STACK_SIZE := 112
-FLASH_SIZE := 17408
+XRAM_SIZE := 256
+STACK_SIZE := 128
+FLASH_SIZE := 8192
 ISP_FREQUENCY := 32000
 
 AS := sdas8051
@@ -214,6 +214,7 @@ SRCS := \
 	$(VENDER_DIR)/usart.c \
 	$(VENDER_DIR)/exti.c \
 	$(VENDER_DIR)/pca.c \
+	$(VENDER_DIR)/timer.c \
 	$(SRC_DIR)/mode.c \
 	$(SRC_DIR)/debug.c \
 	$(SRC_DIR)/measure.c \
@@ -263,8 +264,15 @@ download:
 $(DEP_FILE):
 	@mkdir -p $(OBJDIR_TREE)
 	@rm -f $(DEP_FILE)
-	@for srcFile in $(LOCAL_SRCS) $(VENDER_SRCS); do $(CC) $(CPPFLAGS) -MM $${srcFile} >> $(DEP_FILE); echo '' >> $(DEP_FILE); done
-	@$(SED_CMD) "s/^\(.*\.rel:.*\)/$(BUILD_ROOT)\/\1/g" $(DEP_FILE)
+	@for srcFile in $(LOCAL_SRCS) $(VENDER_SRCS); do \
+		case "$${srcFile}" in \
+			$(VENDER_DIR)/*) objFile="$(OBJDIR)/$${srcFile#$(VENDER_DIR)/}" ;; \
+			*) objFile="$(OBJDIR)/$${srcFile}" ;; \
+		esac; \
+		objFile="$${objFile%.c}.rel"; \
+		$(CC) $(CPPFLAGS) -MM "$${srcFile}" | sed "1s|^[^:]*:|$${objFile}:|" >> $(DEP_FILE); \
+		echo '' >> $(DEP_FILE); \
+	done
 
 
 # -------------------------------------------
@@ -290,5 +298,4 @@ $(OBJDIR)/%.rel: $(VENDER_DIR)/%.c
 
 $(OBJDIR)/%.rel: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
-
 

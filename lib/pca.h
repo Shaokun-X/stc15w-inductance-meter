@@ -52,7 +52,7 @@ typedef struct
 	u8	PCA_Mode;	//PCA_Mode_PWM, PCA_Mode_Capture, PCA_Mode_SoftTimer, PCA_Mode_HighPulseOutput
 	u8	PCA_PWM_Wide;	//PCA_PWM_8bit, PCA_PWM_7bit, PCA_PWM_6bit
 	u8	PCA_Interrupt_Mode;	//PCA_Rise_Active, PCA_Fall_Active, ENABLE, DISABLE
-	u8	PCA_Polity;	//优先级设置	PolityHigh,PolityLow
+	u8	PCA_Polity;	//优先级设置	PriorityHigh,PriorityLow
 	u16	PCA_Value;
 } PCA_InitTypeDef;
 

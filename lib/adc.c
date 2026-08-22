@@ -4,13 +4,13 @@
 
 
 //========================================================================
-// 函数: void	ADC_Inilize(ADC_InitTypeDef *ADCx)
+// 函数: void	ADC_Init(ADC_InitTypeDef *ADCx)
 // 描述: ADC初始化程序.
 // 参数: ADCx: 结构参数,请参考adc.h里的定义.
 // 返回: none.
 // 版本: V1.0, 2012-10-22
 //========================================================================
-void	ADC_Inilize(ADC_InitTypeDef *ADCx)
+void	ADC_Init(ADC_InitTypeDef *ADCx)
 {
 	P1ASF = ADCx->ADC_Px;
 	ADC_CONTR = (ADC_CONTR & ~ADC_90T) | ADCx->ADC_Speed;
@@ -20,7 +20,7 @@ void	ADC_Inilize(ADC_InitTypeDef *ADCx)
 	else									PCON2 &= ~(1<<5);	//10位AD结果的高8位放ADC_RES，低2位在ADC_RESL的低2位。
 	if(ADCx->ADC_Interrupt == ENABLE)	EADC = 1;			//中断允许		ENABLE,DISABLE
 	else								EADC = 0;
-	if(ADCx->ADC_Polity == PolityHigh)	PADC = 1;		//优先级设置	PolityHigh,PolityLow
+	if(ADCx->ADC_Priority == PriorityHigh)	PADC = 1;		//优先级设置	PriorityHigh,PriorityLow
 	else								PADC = 0;
 }
 

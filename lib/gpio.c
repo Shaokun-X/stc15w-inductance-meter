@@ -10,13 +10,13 @@
 
 
 //========================================================================
-// 函数: u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
+// 函数: u8	GPIO_Init(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 // 描述: 初始化IO口.
 // 参数: GPIOx: 结构参数,请参考timer.h里的定义.
 // 返回: 成功返回0, 空操作返回1,错误返回2.
 // 版本: V1.0, 2012-10-22
 //========================================================================
-u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
+u8	GPIO_Init(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 {
 	if(GPIO > GPIO_P5)				return 1;	//空操作
 	if(GPIOx->Mode > GPIO_OUT_PP)	return 2;	//错误

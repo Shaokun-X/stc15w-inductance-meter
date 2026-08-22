@@ -39,11 +39,11 @@ typedef struct
 	u8	ADC_Speed;		//ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
 	u8	ADC_Power;		//ADC功率允许/关闭	ENABLE,DISABLE
 	u8	ADC_AdjResult;	//ADC结果调整,	ADC_RES_H2L8,ADC_RES_H8L2
-	u8	ADC_Polity;		//优先级设置	PolityHigh,PolityLow
+	u8	ADC_Priority;		//优先级设置	PriorityHigh,PriorityLow
 	u8	ADC_Interrupt;	//中断允许		ENABLE,DISABLE
 } ADC_InitTypeDef;
 
-void	ADC_Inilize(ADC_InitTypeDef *ADCx);
+void	ADC_Init(ADC_InitTypeDef *ADCx);
 void	ADC_PowerControl(u8 pwr);
 u8		ADC_StartConversion(u8 channel);
 u16		ADC_ReadResult(void);

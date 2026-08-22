@@ -22,7 +22,7 @@
 typedef struct
 {
 	u8	TIM_Mode;		//工作模式,  	TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
-	u8	TIM_Polity;		//优先级设置	PolityHigh,PolityLow
+	u8	TIM_Priority;		//优先级设置	PriorityHigh,PriorityLow
 	u8	TIM_Interrupt;	//中断允许		ENABLE,DISABLE
 	u8	TIM_ClkSource;	//时钟源		TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	u8	TIM_ClkOut;		//可编程时钟输出,	ENABLE,DISABLE
@@ -30,6 +30,6 @@ typedef struct
 	u8	TIM_Run;		//是否运行		ENABLE,DISABLE
 } TIM_InitTypeDef;
 
-u8	Timer_Inilize(u8 TIM, TIM_InitTypeDef *TIMx);
+u8	Timer_Init(u8 TIM, TIM_InitTypeDef *TIMx);
 
 #endif
