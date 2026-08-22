@@ -11,8 +11,8 @@
 
 volatile enum Mode mode = MODE_AUTO;
 
-static void pca_timer_restart(void);
-static void pca_timer_stop(void);
+static inline void pca_timer_restart(void);
+static inline void pca_timer_stop(void);
 static enum Mode cycle_mode(void);
 
 void mode_init(void)
@@ -63,6 +63,27 @@ static enum Mode cycle_mode(void)
     return mode;
 }
 
+static inline void pca_timer_stop(void)
+{
+    CR = 0;
+}
+
+static inline void pca_timer_restart(void)
+{
+    CR = 0;
+
+    CCF0 = 0;
+    CF = 0;
+
+    CH = 0;
+    CL = 0;
+
+    CCAP0_tmp = PCA_Timer0;
+    CCAP0L = (u8)CCAP0_tmp;
+    CCAP0H = (u8)(CCAP0_tmp >> 8);
+
+    CR = 1;
+}
 
 void int1_isr (void) __interrupt (INT1_VECTOR)		//进中断时已经清除标志
 {
@@ -90,26 +111,4 @@ void pca_isr(void) __interrupt (PCA_VECTOR)
             pca_timer_stop();
         }
     }
-}
-
-static inline void pca_timer_stop(void)
-{
-    CR = 0;
-}
-
-static inline void pca_timer_restart(void)
-{
-    CR = 0;
-
-    CCF0 = 0;
-    CF = 0;
-
-    CH = 0;
-    CL = 0;
-
-    CCAP0_tmp = PCA_Timer0;
-    CCAP0L = (u8)CCAP0_tmp;
-    CCAP0H = (u8)(CCAP0_tmp >> 8);
-
-    CR = 1;
 }

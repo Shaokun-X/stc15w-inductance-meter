@@ -3,27 +3,6 @@
 #include	"adc.h"
 
 
-//========================================================================
-// 函数: void	ADC_PowerControl(u8 pwr)
-// 描述: ADC电源控制程序.
-// 参数: pwr: 电源控制,ENABLE或DISABLE.
-// 返回: none.
-// 版本: V1.0, 2012-10-22
-//========================================================================
-void	ADC_PowerControl(u8 pwr)
-{
-	if(pwr == ENABLE)	ADC_CONTR |= 0x80;
-	else				ADC_CONTR &= 0x7f;
-}
-
-u8 ADC_StartConversion(u8 channel)
-{
-	if(channel > ADC_CH7)	return 1;
-
-	ADC_CONTR = (ADC_CONTR & 0xe0) | ADC_START | channel;
-	return 0;
-}
-
 u16 ADC_ReadResult(void)
 {
 	u16 adc;

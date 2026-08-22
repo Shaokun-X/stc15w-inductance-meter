@@ -52,8 +52,16 @@
 	PADC = ((PRIORITY) == PriorityHigh); \
 } while (0)
 
-void	ADC_PowerControl(u8 pwr);
-u8		ADC_StartConversion(u8 channel);
+/* POWER: ENABLE, DISABLE */
+#define ADC_POWER_CONTROL(POWER) do { \
+	ADC_CONTR = (ADC_CONTR & 0x7f) | (((POWER) == ENABLE) << 7); \
+} while (0)
+
+/* CHANNEL: ADC_CH0 through ADC_CH7 */
+#define ADC_START_CONVERSION(CHANNEL) do { \
+	ADC_CONTR = (ADC_CONTR & 0xe0) | ADC_START | (CHANNEL); \
+} while (0)
+
 u16		ADC_ReadResult(void);
 u16		Get_ADC10bitResult(u8 channel);	//channel = 0~7
 
