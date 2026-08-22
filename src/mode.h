@@ -3,12 +3,6 @@
 
 #include "config.h"
 
-
-#define PCA_TIMER_HZ    100UL
-#define PCA_TIMER_TICKS ((u16)(MAIN_Fosc / 12UL / PCA_TIMER_HZ)) // PCA_Clock_12T
-
-#define BUTTON_PIN P33
-
 enum Mode {
     MODE_AUTO,
     MODE_10U_TO_100U,

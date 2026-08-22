@@ -1,4 +1,6 @@
 #include "debug.h"
+#include "gpio.h"
+#include "usart.h"
 
 void debug_init(void)
 {

@@ -2,8 +2,6 @@
 #define	__DEBUG_H
 
 #include "config.h"
-#include "gpio.h"
-#include "usart.h"
 
 #define DEBUG 1
 #if DEBUG

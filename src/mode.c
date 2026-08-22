@@ -3,6 +3,11 @@
 #include "exti.h"
 #include "pca.h"
 
+#define PCA_TIMER_HZ    100UL
+#define PCA_TIMER_TICKS ((u16)(MAIN_Fosc / 12UL / PCA_TIMER_HZ)) // PCA_Clock_12T
+
+#define BUTTON_PIN P33
+
 volatile enum Mode mode = MODE_AUTO;
 
 static void pca_timer_restart(void);
@@ -82,12 +87,12 @@ void pca_isr(void) __interrupt (PCA_VECTOR)
     }
 }
 
-static void pca_timer_stop(void)
+static inline void pca_timer_stop(void)
 {
     CR = 0;
 }
 
-static void pca_timer_restart(void)
+static inline void pca_timer_restart(void)
 {
     CR = 0;
 
