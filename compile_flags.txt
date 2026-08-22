@@ -1,0 +1,7 @@
+-xc
+-std=c11
+-I.
+-Ilib
+-Isrc
+-include
+clangd_compat.h

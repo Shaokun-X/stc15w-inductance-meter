@@ -1,0 +1,6 @@
+---
+If:
+  PathMatch: lib/eeprom\.c
+Diagnostics:
+  # Clang cannot parse SDCC's legacy multiline __asm/__endasm form.
+  Suppress: asm_qualifier_ignored
