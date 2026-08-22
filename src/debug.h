@@ -1,6 +1,7 @@
 #ifndef	__DEBUG_H
 #define	__DEBUG_H
 
+#include <stdio.h> // IWYU pragma: keep
 #include "config.h"
 
 #define DEBUG 1
