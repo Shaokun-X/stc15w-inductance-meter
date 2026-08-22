@@ -1,4 +1,7 @@
-#include "input.h"
+#include "mode.h"
+#include "gpio.h"
+#include "exti.h"
+#include "pca.h"
 
 volatile enum Mode mode = MODE_AUTO;
 
@@ -6,7 +9,7 @@ static void pca_timer_restart(void);
 static void pca_timer_stop(void);
 static enum Mode cycle_mode(void);
 
-void input_init(void)
+void mode_init(void)
 {
     GPIO_InitTypeDef        GPIO_InitStructure;
 

@@ -3,7 +3,7 @@
 #include "gpio.h"
 #include "adc.h"
 
-#include "input.h"
+#include "mode.h"
 #include "debug.h"
 
 #define ADC_CHANNEL ADC_CH1
@@ -36,7 +36,8 @@ void main(void)
     ADC_InitStructure.ADC_Power     = DISABLE;
     ADC_Inilize(&ADC_InitStructure);                //初始化
 
-    input_init();
+    mode_init();
+    range_init();
     debug_init();
 
     EA = 1;

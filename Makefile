@@ -214,8 +214,10 @@ SRCS := \
 	$(VENDER_DIR)/usart.c \
 	$(VENDER_DIR)/exti.c \
 	$(VENDER_DIR)/pca.c \
-	$(SRC_DIR)/input.c \
+	$(SRC_DIR)/mode.c \
 	$(SRC_DIR)/debug.c \
+	$(SRC_DIR)/measure.c \
+	$(SRC_DIR)/range.c \
 	$(SRC_DIR)/main.c
 
 VENDER_SRCS := $(filter $(VENDER_DIR)%, $(SRCS))
