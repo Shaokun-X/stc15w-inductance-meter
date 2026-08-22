@@ -209,12 +209,9 @@ DEP_FILE := $(OBJDIR)/dependencies.mk
 
 SRCS := \
 	$(VENDER_DIR)/delay.c \
-	$(VENDER_DIR)/gpio.c \
 	$(VENDER_DIR)/adc.c \
 	$(VENDER_DIR)/usart.c \
-	$(VENDER_DIR)/exti.c \
 	$(VENDER_DIR)/pca.c \
-	$(VENDER_DIR)/timer.c \
 	$(SRC_DIR)/mode.c \
 	$(SRC_DIR)/debug.c \
 	$(SRC_DIR)/measure.c \
@@ -298,4 +295,3 @@ $(OBJDIR)/%.rel: $(VENDER_DIR)/%.c
 
 $(OBJDIR)/%.rel: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
-

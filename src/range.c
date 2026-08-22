@@ -21,11 +21,7 @@ void range_init(void)
     SW_5V = HIGH;
     SW_DISCHARGE = LOW;
 
-    GPIO_InitTypeDef        GPIO_InitStructure;
-
-    GPIO_InitStructure.Pin  = GPIO_Pin_2 | GPIO_Pin_3;
-    GPIO_InitStructure.Mode = GPIO_OUT_PP;
-    GPIO_Init(GPIO_P1, &GPIO_InitStructure);
+    GPIO_INIT(P1, GPIO_Pin_2 | GPIO_Pin_3, GPIO_OUT_PP);
 }
 
 enum Range switch_range(enum Range target)

@@ -17,35 +17,19 @@ static enum Mode cycle_mode(void);
 
 void mode_init(void)
 {
-    GPIO_InitTypeDef        GPIO_InitStructure;
-
-    GPIO_InitStructure.Pin  = GPIO_Pin_3;
-    GPIO_InitStructure.Mode = GPIO_HighZ;
-    GPIO_Init(GPIO_P3, &GPIO_InitStructure);
-
-    EXTI_InitTypeDef        EXTI_InitStructure;
-    EXTI_InitStructure.EXTI_Mode = EXT_MODE_RiseFall;
-    EXTI_InitStructure.EXTI_Polity = PriorityLow;
-    EXTI_InitStructure.EXTI_Interrupt = ENABLE;
-    Ext_Init(EXT_INT1, &EXTI_InitStructure);
+    GPIO_INIT(P3, GPIO_Pin_3, GPIO_HighZ);
+    EXTI1_INIT(EXT_MODE_RiseFall, PriorityLow, ENABLE);
 
     /* Configure PCA0 as a 16-bit software timer. */
-    PCA_InitTypeDef         PCA_InitStructure;
-    PCA_InitStructure.PCA_IoUse          = PCA_P12_P11_P10_P37; // doesn't matter when only timer mode is used
-    PCA_InitStructure.PCA_Clock          = PCA_Clock_12T;
-    PCA_InitStructure.PCA_Mode           = PCA_Mode_SoftTimer;
-    PCA_InitStructure.PCA_PWM_Wide       = PCA_PWM_8bit; /* Unused */
-    PCA_InitStructure.PCA_Interrupt_Mode = ENABLE;
-    PCA_InitStructure.PCA_Polity         = PriorityLow;
-    PCA_InitStructure.PCA_Value          = PCA_TIMER_TICKS;
-    PCA_Init(PCA0, &PCA_InitStructure);
+    PCA0_INIT(PCA_Mode_SoftTimer, PCA_PWM_8bit, ENABLE,
+              PCA_TIMER_TICKS);
     CR = 0;
     /*
     * Reset and start the shared PCA counter.
     * DISABLE applies only to the counter-overflow interrupt.
     */
-    PCA_InitStructure.PCA_Interrupt_Mode = DISABLE;
-    PCA_Init(PCA_Counter, &PCA_InitStructure);
+    PCA_COUNTER_INIT(PCA_P12_P11_P10_P37, PCA_Clock_12T, DISABLE,
+                     PriorityLow);
 }
 
 static enum Mode cycle_mode(void)

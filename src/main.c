@@ -19,34 +19,17 @@ void main(void)
     EA = 0;
 
     // led
-    GPIO_InitTypeDef        GPIO_InitStructure;
-    GPIO_InitStructure.Pin  = GPIO_Pin_2;
-    GPIO_InitStructure.Mode = GPIO_OUT_PP;
-    GPIO_Init(GPIO_P3, &GPIO_InitStructure);
+    GPIO_INIT(P3, GPIO_Pin_2, GPIO_OUT_PP);
 
     // adc
-    GPIO_InitStructure.Pin  = GPIO_Pin_1;
-    GPIO_InitStructure.Mode = GPIO_HighZ;
-    GPIO_Init(GPIO_P1, &GPIO_InitStructure);
+    GPIO_INIT(P1, GPIO_Pin_1, GPIO_HighZ);
 
-    ADC_InitTypeDef         ADC_InitStructure;              //结构定义
-    ADC_InitStructure.ADC_Speed     = ADC_90T;               //设置 ADC 工作时钟频率 ADC_SPEED_2X1T~ADC_SPEED_2X16T
-    ADC_InitStructure.ADC_Px        = ADC_P11;
-    ADC_InitStructure.ADC_AdjResult = ADC_RES_H2L8;  //ADC结果调整,  ADC_LEFT_JUSTIFIED,ADC_RIGHT_JUSTIFIED
-    ADC_InitStructure.ADC_Interrupt = ENABLE;
-    ADC_InitStructure.ADC_Priority    = PriorityLow;
-    ADC_InitStructure.ADC_Power     = DISABLE;
-    ADC_Init(&ADC_InitStructure);                //初始化
+    ADC_INIT(ADC_P11, ADC_90T, DISABLE, ADC_RES_H2L8, ENABLE,
+             PriorityLow);
 
     // timer
-    TIM_InitTypeDef     TIM_InitStructure;
-    TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;
-    TIM_InitStructure.TIM_Interrupt = DISABLE;
-    TIM_InitStructure.TIM_Value     = 0;
-    TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;
-    TIM_InitStructure.TIM_ClkOut = DISABLE;
-    TIM_InitStructure.TIM_Run = DISABLE;
-    Timer_Init(Timer0, &TIM_InitStructure);
+    TIMER0_INIT(TIM_16BitAutoReload, PriorityLow, DISABLE,
+                TIM_CLOCK_1T, DISABLE, 0, DISABLE);
 
     mode_init();
     range_init();
@@ -76,4 +59,3 @@ void adc_isr (void) __interrupt (ADC_VECTOR)
     ADC_CONTR &= ~ADC_FLAG;
     adc_result_ready = true;
 }
-
