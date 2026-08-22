@@ -4,10 +4,10 @@
 
 #include	"config.h"
 
-#define	COM_TX1_Lenth	32
-#define	COM_RX1_Lenth	32
-#define	COM_TX2_Lenth	32
-#define	COM_RX2_Lenth	32
+#define	COM_TX1_Lenth	16
+#define	COM_RX1_Lenth	16
+#define	COM_TX2_Lenth	16
+#define	COM_RX2_Lenth	16
 
 #define	USART1	1
 #define	USART2	2

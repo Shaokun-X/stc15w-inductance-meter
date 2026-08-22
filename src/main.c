@@ -2,7 +2,7 @@
 #include "delay.h"
 #include "gpio.h"
 #include "adc.h"
-// #include "timer.h"
+#include "timer.h"
 
 #include "mode.h"
 #include "debug.h"
@@ -39,17 +39,17 @@ void main(void)
     ADC_Init(&ADC_InitStructure);                //初始化
 
     // timer
-    // TIM_InitTypeDef     TIM_InitStructure;
-    // TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;
-    // TIM_InitStructure.TIM_Interrupt = DISABLE;
-    // TIM_InitStructure.TIM_Value     = 0;
-    // TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;
-    // TIM_InitStructure.TIM_ClkOut = DISABLE;
-    // TIM_InitStructure.TIM_Run = DISABLE;
-    // Timer_Init(Timer0, &TIM_InitStructure);
+    TIM_InitTypeDef     TIM_InitStructure;
+    TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;
+    TIM_InitStructure.TIM_Interrupt = DISABLE;
+    TIM_InitStructure.TIM_Value     = 0;
+    TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;
+    TIM_InitStructure.TIM_ClkOut = DISABLE;
+    TIM_InitStructure.TIM_Run = DISABLE;
+    Timer_Init(Timer0, &TIM_InitStructure);
 
-    // mode_init();
-    // range_init();
+    mode_init();
+    range_init();
     debug_init();
 
     EA = 1;
@@ -57,14 +57,14 @@ void main(void)
     delay_ms(2);
     ADC_StartConversion(ADC_CH1);
 
-    // TR0 = 1;
+    TR0 = 1;
     
     while (true)
     {
         delay_ms(500);
         // P32 = !P32;
-        log("%d\n", adc_result);
-        // log("%u\n", ((unsigned int)TH0 << 8) | TL0);
+        // log("%d\n", adc_result);
+        log("%u\n", ((unsigned int)TH0 << 8) | TL0);
         ADC_StartConversion(ADC_CH1);
     }
 }
