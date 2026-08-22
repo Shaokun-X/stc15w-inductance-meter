@@ -5,6 +5,7 @@
 
 #include "mode.h"
 #include "debug.h"
+#include "range.h"
 
 #define ADC_CHANNEL ADC_CH1
 

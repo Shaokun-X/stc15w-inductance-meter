@@ -1,9 +1,6 @@
 #ifndef	__AUTORANGE_H
 #define	__AUTORANGE_H
 
-#define SW_5V P12
-#define SW_DISCHARGE P13
-
 enum Range {
     RANGE_BELOW_10U, // outbound
     RANGE_10U_TO_100U, // comparator range
@@ -15,6 +12,8 @@ enum Range {
     RANGE_COUNT,
 };
 
+#define SW_5V P12
+#define SW_DISCHARGE P13
 #define COMPARATOR_RANGE RANGE_10U_TO_100U
 // pessimistic time needed for the capacitor bank to fully discharge to low excitation voltage, in us
 #define DISCHARGE_TIME 100

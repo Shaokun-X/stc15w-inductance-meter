@@ -1,4 +1,5 @@
 #include "range.h"
+#include "config.h"
 #include "gpio.h"
 #include "delay.h"
 
