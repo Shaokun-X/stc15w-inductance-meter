@@ -9,7 +9,7 @@
 
 #define BUTTON_PIN P33
 
-volatile enum Mode mode = MODE_AUTO;
+volatile __data enum Mode mode = MODE_AUTO;
 
 static inline void pca_timer_restart(void);
 static inline void pca_timer_stop(void);

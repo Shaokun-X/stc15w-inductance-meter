@@ -12,7 +12,7 @@ enum Mode {
     MODE_COUNT,
 };
 
-extern volatile enum Mode mode;
+extern volatile __data enum Mode mode;
 
 void mode_init(void);
 

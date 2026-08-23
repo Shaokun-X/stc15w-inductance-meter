@@ -5,7 +5,7 @@
 
 #define SW_5V P12
 #define SW_DISCHARGE P13
-#define COMPARATOR_RANGE RANGE_10U_TO_100U
+#define IS_LOW_EXCITATION_RANGE(value) (((value) == RANGE_10U_TO_100U) || ((value) == RANGE_100U_TO_1M))
 // pessimistic time needed for the capacitor bank to fully discharge to low excitation voltage, in us
 #define DISCHARGE_TIME 100
 // time needed for the source to charge up the capacitors, in us
@@ -13,7 +13,7 @@
 // delay time before switching 2 MOSFETs on the same path, in us
 #define SHOOT_THROUGH_DEADZONE 20
 
-volatile enum Range range = COMPARATOR_RANGE;
+volatile __data enum Range range = COMPARATOR_RANGE;
 
 void range_init(void)
 {
@@ -29,13 +29,13 @@ enum Range switch_range(enum Range target)
     if (range == target)
         return range;
 
-    if (range == COMPARATOR_RANGE)
+    if (IS_LOW_EXCITATION_RANGE(range) && !IS_LOW_EXCITATION_RANGE(target))
     {
         // pull up to 5v, turn on pull-up PMOS
         SW_5V = LOW;
         delay_us(CHARGE_TIME);
     }
-    else if (target == COMPARATOR_RANGE)
+    else if (!IS_LOW_EXCITATION_RANGE(range) && IS_LOW_EXCITATION_RANGE(target))
     {
         // pull down to 0.5v
         // turn off pull-up PMOS

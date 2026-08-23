@@ -8,6 +8,7 @@
 #define __sfr volatile unsigned char
 #define __sbit volatile unsigned char
 #define __bit unsigned char
+#define __data
 #define __xdata
 #define __code
 #define __at(address)

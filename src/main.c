@@ -1,18 +1,14 @@
 #include "config.h"
 #include "delay.h"
 #include "gpio.h"
-#include "adc.h"
+#include "stc15.h"
 #include "timer.h"
 
 #include "mode.h"
 #include "debug.h"
 #include "range.h"
+#include "measure.h"
 
-#define ADC_CHANNEL ADC_CH1
-
-
-volatile u16 adc_result;
-volatile bool adc_result_ready;
 
 void main(void)
 {
@@ -20,42 +16,29 @@ void main(void)
 
     // led
     GPIO_INIT(P3, GPIO_Pin_2, GPIO_OUT_PP);
+    P32 = 1;
 
-    // adc
-    GPIO_INIT(P1, GPIO_Pin_1, GPIO_HighZ);
+    
 
-    ADC_INIT(ADC_P11, ADC_90T, DISABLE, ADC_RES_H2L8, ENABLE,
-             PriorityLow);
-
-    // timer
-    TIMER0_INIT(TIM_16BitAutoReload, PriorityLow, DISABLE,
-                TIM_CLOCK_1T, DISABLE, 0, DISABLE);
-
+    debug_init();
     mode_init();
     range_init();
-    debug_init();
+    measure_init();
 
     EA = 1;
-    ADC_POWER_CONTROL(ENABLE);
-    delay_ms(2);
-    ADC_START_CONVERSION(ADC_CH1);
-
     TR0 = 1;
+
     
     while (true)
     {
         delay_ms(500);
         // P32 = !P32;
-        log("%d\n", adc_result);
-        // log("%u\n", ((unsigned int)TH0 << 8) | TL0);
-        ADC_START_CONVERSION(ADC_CH1);
+        log("%d\n", TF0);
+        // TR0 = 1;
+        log("%d\n", TF0);
+        log("%u\n", ((unsigned int)TH0 << 8) | TL0);
+        // TF0 = 0;
     }
 }
 
-void adc_isr (void) __interrupt (ADC_VECTOR)
-{
-    // must be ADC_RES_H2L8
-    adc_result = ((u16)(ADC_RES & 0x03) << 8) | ADC_RESL;
-    ADC_CONTR &= ~ADC_FLAG;
-    adc_result_ready = true;
-}
+
