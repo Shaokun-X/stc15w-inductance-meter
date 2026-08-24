@@ -183,9 +183,9 @@ TARGET_ARCH := -mmcs51
 MEMORY_MODEL := --model-medium
 IRAM_SIZE := 256
 XRAM_SIZE := 256
-STACK_SIZE := 128
+STACK_SIZE := 96
 FLASH_SIZE := 8192
-ISP_FREQUENCY := 34000
+ISP_FREQUENCY := 36000
 
 AS := sdas8051
 CC := sdcc
@@ -214,6 +214,7 @@ SRCS := \
 	$(VENDER_DIR)/pca.c \
 	$(SRC_DIR)/mode.c \
 	$(SRC_DIR)/debug.c \
+	$(SRC_DIR)/math.c \
 	$(SRC_DIR)/measure.c \
 	$(SRC_DIR)/range.c \
 	$(SRC_DIR)/main.c

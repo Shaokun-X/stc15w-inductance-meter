@@ -1,4 +1,5 @@
 #include "measure.h"
+#include "math.h"
 #include "adc.h"
 #include "clangd_compat.h"
 #include "gpio.h"
@@ -45,6 +46,7 @@
 
 // from 0.2 to 0.75, with 0.05 step
 static __data unsigned int thresholds[THRESHOLDS_COUNT+1];
+static __data unsigned int stable_voltage;
 static __data unsigned int adc_result;
 static __data unsigned int voltage_buffer[THRESHOLDS_COUNT];
 static __data unsigned int time_buffer[THRESHOLDS_COUNT];
@@ -101,6 +103,7 @@ static inline void initialize_thresholds(void)
     ADC_WAIT_FOR_RESULT();
     unsigned int result = ADC_GET_RESULT();
     ADC_CLEAR_FLAG();
+    stable_voltage = result;
 
     // calculate thresholds
     for (int i = 0; i < THRESHOLDS_COUNT+1; i++)
@@ -132,8 +135,16 @@ static void measure_with_adc(Result *result)
         // adc is much slower than this loop body
         ADC_START_CONVERSION(ADC_CHANNEL);
         
-        if (!voltage_buffer[next_threshold_i] && adc_result > thresholds[next_threshold_i])
+        if (adc_result > thresholds[next_threshold_i] && !voltage_buffer[next_threshold_i])
         {
+            while (next_threshold_i < THRESHOLDS_COUNT && adc_result > thresholds[next_threshold_i + 1])
+            {
+                next_threshold_i++;
+            }
+
+            if (next_threshold_i == THRESHOLDS_COUNT)
+                break;
+
             voltage_buffer[next_threshold_i] = adc_result;
             time_buffer[next_threshold_i] = time_point;
             next_threshold_i++;
@@ -149,7 +160,7 @@ static void measure_with_adc(Result *result)
         return;
     }
 
-    // if there are less than 3 points, consider underflow
+    // if there are less than 2 points, consider underflow
     unsigned char point_count = 0;
     for (int i = 0; i < THRESHOLDS_COUNT; i++)
     {
@@ -158,13 +169,18 @@ static void measure_with_adc(Result *result)
             point_count++;
         }
     }
-    if (point_count < 3) {
+    if (point_count < 2) {
         result->data = 0;
         result->status = UNDERFLOW;
         return;
     }
 
-
+    if (calculate_voltage_slope_q16(time_buffer, voltage_buffer, point_count, stable_voltage) == 0)
+    {
+        result->data = 0;
+        result->status = UNDERFLOW;
+        return;
+    }
 }
 
 static void measure_with_comparator(Result *result)
