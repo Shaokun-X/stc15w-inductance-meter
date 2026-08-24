@@ -44,12 +44,14 @@
 
 #define THRESHOLDS_COUNT 12
 
+static const __code unsigned int RESISTANCE_MAPPING[RANGE_COUNT] = {2, 10, 100, 1000};
+
 // from 0.2 to 0.75, with 0.05 step
 static __data unsigned int thresholds[THRESHOLDS_COUNT+1];
 static __data unsigned int stable_voltage;
 static __data unsigned int adc_result;
 static __data unsigned int voltage_buffer[THRESHOLDS_COUNT];
-static __data unsigned int time_buffer[THRESHOLDS_COUNT];
+static unsigned int time_buffer[THRESHOLDS_COUNT];
 
 void measure_init(void)
 {
@@ -175,12 +177,19 @@ static void measure_with_adc(Result *result)
         return;
     }
 
-    if (calculate_voltage_slope_q16(time_buffer, voltage_buffer, point_count, stable_voltage) == 0)
+    unsigned long slope_q16 = calculate_voltage_slope_q16(time_buffer, voltage_buffer, point_count, stable_voltage);
+
+    // regression result is 0
+    if ( slope_q16 == 0)
     {
         result->data = 0;
         result->status = UNDERFLOW;
         return;
     }
+
+    unsigned int resistance = RESISTANCE_MAPPING[range];
+    result->data = (unsigned int) ((slope_q16 + resistance / 2) / resistance);
+    result->status = OK;
 }
 
 static void measure_with_comparator(Result *result)
@@ -194,7 +203,7 @@ static void measure_once(Result *result)
     {
         measure_with_comparator(result);
     }
-    return measure_with_adc(result);
+    measure_with_adc(result);
 }
 
 // void adc_isr(void) __interrupt(ADC_VECTOR)
