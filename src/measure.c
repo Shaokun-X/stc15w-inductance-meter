@@ -28,7 +28,13 @@
 
 // must be ADC_RES_H2L8
 #define ADC_GET_RESULT() (((unsigned int)(ADC_RES & 0x03) << 8) | ADC_RESL)
-#define ADC_CLEAR_FLAG() (ADC_CONTR &= ~ADC_FLAG)
+#define ADC_CONTR_IDLE_VALUE (0x80 | ADC_90T | ADC_CHANNEL)      /* 0xE1 */
+#define ADC_CONTR_START_VALUE (ADC_CONTR_IDLE_VALUE | ADC_START) /* 0xE9 */
+
+#define ADC_CLEAR_FLAG() (ADC_CONTR = ADC_CONTR_IDLE_VALUE)
+
+#define ADC_START_MEASUREMENT() (ADC_CONTR = ADC_CONTR_START_VALUE)
+
 #define ADC_WAIT_FOR_RESULT()                                                                      \
     do                                                                                             \
     {                                                                                              \
@@ -41,7 +47,17 @@
         TF0 = 0;                                                                                   \
         TR0 = 1;                                                                                   \
     } while (0)
-#define TIMER_GET_VALUE() (TL0 | ((unsigned int)TH0 << 8))
+#define TIMER_GET_VALUE(VALUE)                                                                     \
+    do                                                                                             \
+    {                                                                                              \
+        unsigned char timer_high;                                                                  \
+        do                                                                                         \
+        {                                                                                          \
+            timer_high = TH0;                                                                      \
+            (VALUE) = TL0;                                                                         \
+        } while (timer_high != TH0);                                                               \
+        (VALUE) |= (unsigned int)timer_high << 8;                                                  \
+    } while (0)
 #define TIMER_STOP() (TR0 = 0)
 
 #define THRESHOLDS_COUNT 12
@@ -107,7 +123,7 @@ static inline void initialize_thresholds(void)
     excite();
     delay_ms(CHARGE_TIMEOUT);
     // measure the result detect if it is outbound
-    ADC_START_CONVERSION(ADC_CHANNEL);
+    ADC_START_MEASUREMENT();
     ADC_WAIT_FOR_RESULT();
     stable_voltage = ADC_GET_RESULT();
     ADC_CLEAR_FLAG();
@@ -139,18 +155,20 @@ static void measure_with_adc(Result *result)
 
     excite();
     TIMER_START();
-    ADC_START_CONVERSION(ADC_CHANNEL);
+    ADC_START_MEASUREMENT();
 
-    while (TR0 && !TF0 && !voltage_buffer[THRESHOLDS_COUNT - 1])
+    while (!TF0 && !voltage_buffer[THRESHOLDS_COUNT - 1])
     {
         ADC_WAIT_FOR_RESULT();
         adc_result = ADC_GET_RESULT();
-        time_point = TIMER_GET_VALUE();
-        // adc is much slower than this loop body
-        ADC_START_CONVERSION(ADC_CHANNEL);
+        // start adc as soon as possible; time read is okay to be delayed, because shifting doesn't
+        // affect slope calculation
+        ADC_START_MEASUREMENT();
+        TIMER_GET_VALUE(time_point);
+        // adc is slower than this loop body
         // log("adc %d\n", adc_result);
 
-        if (adc_result > thresholds[next_threshold_i] && !voltage_buffer[next_threshold_i])
+        if (adc_result > thresholds[next_threshold_i])
         {
             while (next_threshold_i < THRESHOLDS_COUNT &&
                    adc_result > thresholds[next_threshold_i + 1])
@@ -184,7 +202,7 @@ static void measure_with_adc(Result *result)
     {
         if (voltage_buffer[i])
         {
-            // log("[%d]voltage %d, time %d\n", i, voltage_buffer[i], time_buffer[i]);
+            log("[%d]voltage %d, time %d\n", i, voltage_buffer[i], time_buffer[i]);
             point_count++;
         }
     }
@@ -215,7 +233,9 @@ static void measure_with_adc(Result *result)
 
     result->data = inductance;
     result->status = OK;
-    log("result %lu\n", result->data);
+    // log("slope %lu\n", slope_q16);
+    // log("resistance %u\n", resistance);
+    // log("result %lu\n", result->data);
 }
 
 static void measure_with_comparator(Result *result) {}

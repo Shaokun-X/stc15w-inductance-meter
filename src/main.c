@@ -23,7 +23,7 @@ void main(void)
 
     EA = 1;
 
-    switch_range(RANGE_1M_TO_10M);
+    switch_range(RANGE_100U_TO_1M);
     Result r;
 
     while (true)
@@ -31,7 +31,7 @@ void main(void)
         delay_ms(500);
         measure_once(&r);
         // P32 = !P32;
-        // log("%d\n", r.data >> 8);
+        log("result %lu, status %d\n", r.data, r.status);
         // log("%d\n", r.status);
         // log("test\n");
     }
