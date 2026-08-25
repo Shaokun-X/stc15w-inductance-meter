@@ -33,12 +33,14 @@
     do                                                                                             \
     {                                                                                              \
     } while (!(ADC_CONTR & ADC_FLAG))
-#define TIMER_START() do { \
-    TL0 = 0; \
-    TH0 = 0; \
-    TF0 = 0; \
-    TR0 = 1; \
-} while (0)
+#define TIMER_START()                                                                              \
+    do                                                                                             \
+    {                                                                                              \
+        TL0 = 0;                                                                                   \
+        TH0 = 0;                                                                                   \
+        TF0 = 0;                                                                                   \
+        TR0 = 1;                                                                                   \
+    } while (0)
 #define TIMER_GET_VALUE() (TL0 | ((unsigned int)TH0 << 8))
 #define TIMER_STOP() (TR0 = 0)
 
@@ -47,7 +49,7 @@
 static const __code unsigned int RESISTANCE_MAPPING[RANGE_COUNT] = {2, 10, 100, 1000};
 
 // from 0.2 to 0.75, with 0.05 step
-static __data unsigned int thresholds[THRESHOLDS_COUNT+1];
+static __data unsigned int thresholds[THRESHOLDS_COUNT + 1];
 static __data unsigned int stable_voltage;
 static __data unsigned int adc_result;
 static __data unsigned int voltage_buffer[THRESHOLDS_COUNT];
@@ -116,7 +118,7 @@ static inline void initialize_thresholds(void)
     log("stable %d\n", stable_voltage);
 
     // calculate thresholds
-    for (char i = 0; i < THRESHOLDS_COUNT+1; i++)
+    for (char i = 0; i < THRESHOLDS_COUNT + 1; i++)
     {
         thresholds[i] = (unsigned int)(((unsigned long)stable_voltage * (i + 4) + 10) / 20);
     }
@@ -127,9 +129,10 @@ static void measure_with_adc(Result *result)
     __data unsigned char next_threshold_i = 0;
     __data unsigned int time_point;
     unsigned char i;
-    
+
     adc_result = 0;
-    for (i = 0; i < THRESHOLDS_COUNT; i++) {
+    for (i = 0; i < THRESHOLDS_COUNT; i++)
+    {
         voltage_buffer[i] = 0;
         time_buffer[i] = 0;
     }
@@ -147,10 +150,10 @@ static void measure_with_adc(Result *result)
         ADC_START_CONVERSION(ADC_CHANNEL);
         // log("adc %d\n", adc_result);
 
-        
         if (adc_result > thresholds[next_threshold_i] && !voltage_buffer[next_threshold_i])
         {
-            while (next_threshold_i < THRESHOLDS_COUNT && adc_result > thresholds[next_threshold_i + 1])
+            while (next_threshold_i < THRESHOLDS_COUNT &&
+                   adc_result > thresholds[next_threshold_i + 1])
             {
                 next_threshold_i++;
             }
@@ -167,7 +170,8 @@ static void measure_with_adc(Result *result)
     deexcite();
 
     // timer overflows, time constant is larger than 2ms, consider out of range
-    if (TF0) {
+    if (TF0)
+    {
         TF0 = 0;
         result->data = 0;
         result->status = OVERFLOW;
@@ -180,38 +184,41 @@ static void measure_with_adc(Result *result)
     {
         if (voltage_buffer[i])
         {
-            log("[%d]voltage %d, time %d\n", i, voltage_buffer[i], time_buffer[i]);
+            // log("[%d]voltage %d, time %d\n", i, voltage_buffer[i], time_buffer[i]);
             point_count++;
         }
     }
-    if (point_count < 2) {
-        result->data = 0;
-        result->status = UNDERFLOW;
-        return;
-    }
-
-    unsigned long slope_q16 = calculate_voltage_slope_q16(time_buffer, voltage_buffer, THRESHOLDS_COUNT, stable_voltage);
-
-    // regression result is 0
-    if ( slope_q16 == 0)
+    if (point_count < 2)
     {
         result->data = 0;
         result->status = UNDERFLOW;
         return;
     }
 
-    unsigned int resistance = RESISTANCE_MAPPING[range];
-    result->data = (slope_q16 >> 16) * resistance;
-    result->data += (((slope_q16 & 0xffffUL) * resistance) + 0x8000UL) >> 16;
-    result->data = (result->data + MAIN_Fosc / 2000000UL) / (MAIN_Fosc / 1000000UL);
+    unsigned long slope_q16 =
+        calculate_voltage_slope_q16(time_buffer, voltage_buffer, THRESHOLDS_COUNT, stable_voltage);
+
+    // regression result is 0
+    if (slope_q16 == 0)
+    {
+        result->data = 0;
+        result->status = UNDERFLOW;
+        return;
+    }
+
+    unsigned int resistance =
+        (((unsigned long)RESISTANCE_MAPPING[range] << 10) + stable_voltage / 2U) / stable_voltage;
+
+    unsigned long inductance = (slope_q16 >> 16) * resistance;
+    inductance += (((slope_q16 & 0xffffUL) * resistance) + 0x8000UL) >> 16;
+    inductance = (inductance + MAIN_Fosc / 2000000UL) / (MAIN_Fosc / 1000000UL);
+
+    result->data = inductance;
     result->status = OK;
-
-    // log("result %lu\n", result->data);
+    log("result %lu\n", result->data);
 }
 
-static void measure_with_comparator(Result *result)
-{
-}
+static void measure_with_comparator(Result *result) {}
 
 void measure_once(Result *result)
 {
