@@ -183,7 +183,7 @@ TARGET_ARCH := -mmcs51
 MEMORY_MODEL := --model-medium
 IRAM_SIZE := 256
 XRAM_SIZE := 256
-STACK_SIZE := 80
+STACK_SIZE := 96
 FLASH_SIZE := 8192
 ISP_FREQUENCY := 36000
 
@@ -251,6 +251,9 @@ clean:
 
 download:
 	uv run stcgal -t $(ISP_FREQUENCY) $(HEX_FILE);
+
+serial:
+	tio --map INLCRNL -b 115200 /dev/ttyUSB0
 
 # console:
 # 	# TODO: Replace with your favorite terminal emulator

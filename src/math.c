@@ -36,10 +36,38 @@ unsigned int transform_voltage_q11(unsigned int voltage, unsigned int stable_vol
     return log_q11 + (unsigned int)((2 * sum_q15 + 8) >> 4);
 }
 
-/* Returns the transformed least-squares slope in unsigned Q16.16. */
+static unsigned long divide_q32(unsigned long numerator, unsigned long denominator)
+{
+    unsigned char i;
+    unsigned long quotient = 0;
+
+    if (!denominator)
+        return 0;
+
+    if (numerator >= denominator)
+        return 0xffffffffUL;
+
+    for (i = 0; i < 32; i++)
+    {
+        quotient <<= 1;
+        if (numerator >= denominator - numerator)
+        {
+            numerator -= denominator - numerator;
+            quotient |= 1;
+        }
+        else
+        {
+            numerator <<= 1;
+        }
+    }
+
+    return quotient;
+}
+
+/* Returns the time/transformed-voltage slope in unsigned Q16.16. */
 unsigned long calculate_voltage_slope_q16(const unsigned int *time_buffer,
                                           const __data unsigned int *voltage_buffer,
-                                          unsigned char point_count,
+                                          unsigned char buffer_size,
                                           unsigned int stable_voltage)
 {
     unsigned char i;
@@ -51,11 +79,19 @@ unsigned long calculate_voltage_slope_q16(const unsigned int *time_buffer,
     unsigned long denominator;
     unsigned long left;
     unsigned long right;
+    unsigned char point_count = 0;
 
-    for (i = 0; i < point_count; i++)
+    for (i = 0; i < buffer_size; i++)
     {
-        unsigned int x = time_buffer[i] >> TIMER_REGRESSION_SHIFT;
-        unsigned int y = transform_voltage_q11(voltage_buffer[i], stable_voltage);
+        if (!voltage_buffer[i])
+        {
+            continue;
+        }
+
+        point_count++;
+
+        unsigned int x = transform_voltage_q11(voltage_buffer[i], stable_voltage);
+        unsigned int y = time_buffer[i] >> TIMER_REGRESSION_SHIFT;
 
         sum_x += x;
         sum_y += y;
@@ -71,6 +107,6 @@ unsigned long calculate_voltage_slope_q16(const unsigned int *time_buffer,
     right = sum_x * sum_x;
     denominator = left - right;
 
-    /* Q5.11 voltage and 32-tick time units combine into a Q16.16 slope. */
-    return (numerator + denominator / 2) / denominator;
+    /* The input scales require a 2^32 ratio to produce a Q16.16 result. */
+    return divide_q32(numerator, denominator);
 }
