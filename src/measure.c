@@ -6,25 +6,25 @@
 #include "stc15.h"
 #include "timer.h"
 #include "delay.h"
-#include "debug.h"
 #include "range.h"
-#include <stdbool.h>
+#include "debug.h"
 
-#define ADC_CHANNEL ADC_CH1
-// above which adc result we consider that the LR circuit is stable
-#define STABLE_VOLTAGE_THRESHOLD 1020
+// must match ADC_PIN_PIN
+#define ADC_CHANNEL ADC_CH3
 
 // time below which the inductor must fully charge, other we consider the current range is too low,
 // in ms
 #define CHARGE_TIMEOUT 2
 // time that ensures the full discharge of the inductor, in ms
 #define DISCHARGE_DEADZONE 10
+#define STABLE_VOLTAGE_LOWER_DEADZONE 10
 
 #define RANGE_10U_TO_100U_PIN P14
 #define RANGE_100U_TO_1M_PIN P15
 #define RANGE_1M_TO_10M_PIN P54
 #define RANGE_10M_TO_1H_PIN P55
-#define ADC_PIN_PIN P11
+// must match ADC_CHANNEL, the PIN needs to be init as high z
+#define ADC_PIN_PIN P13
 
 // must be ADC_RES_H2L8
 #define ADC_GET_RESULT() (((unsigned int)(ADC_RES & 0x03) << 8) | ADC_RESL)
@@ -73,7 +73,7 @@ static unsigned int time_buffer[THRESHOLDS_COUNT];
 
 void measure_init(void)
 {
-    GPIO_INIT(P1, GPIO_Pin_1, GPIO_HighZ);
+    GPIO_INIT(P1, GPIO_Pin_3, GPIO_HighZ);
     GPIO_INIT(P1, GPIO_Pin_4 | GPIO_Pin_5, GPIO_OUT_PP);
     GPIO_INIT(P5, GPIO_Pin_4 | GPIO_Pin_5, GPIO_OUT_PP);
     RANGE_10U_TO_100U_PIN = LOW;
@@ -121,6 +121,7 @@ static inline void initialize_thresholds(void)
     delay_ms(DISCHARGE_DEADZONE);
     // excite and delay to make sure the inductor is fully charged
     excite();
+    // TODO use exponential test
     delay_ms(CHARGE_TIMEOUT);
     // measure the result detect if it is outbound
     ADC_START_MEASUREMENT();
@@ -136,7 +137,7 @@ static inline void initialize_thresholds(void)
     // calculate thresholds
     for (char i = 0; i < THRESHOLDS_COUNT + 1; i++)
     {
-        thresholds[i] = (unsigned int)(((unsigned long)stable_voltage * (i + 4) + 10) / 20);
+        thresholds[i] = (unsigned int)(((unsigned long)stable_voltage * (i + 6) + 10) / 20);
     }
 }
 
@@ -153,8 +154,8 @@ static void measure_with_adc(Result *result)
         time_buffer[i] = 0;
     }
 
-    excite();
     TIMER_START();
+    excite();
     ADC_START_MEASUREMENT();
 
     while (!TF0 && !voltage_buffer[THRESHOLDS_COUNT - 1])
@@ -202,12 +203,13 @@ static void measure_with_adc(Result *result)
     {
         if (voltage_buffer[i])
         {
-            log("[%d]voltage %d, time %d\n", i, voltage_buffer[i], time_buffer[i]);
+            log("[%d]voltage %d, time %d, threshold %d\n", i, voltage_buffer[i], time_buffer[i], thresholds[i]);
             point_count++;
         }
     }
     if (point_count < 2)
     {
+        // log("less than 2 points\n");
         result->data = 0;
         result->status = UNDERFLOW;
         return;
@@ -219,6 +221,7 @@ static void measure_with_adc(Result *result)
     // regression result is 0
     if (slope_q16 == 0)
     {
+        // log("regression 0\n");
         result->data = 0;
         result->status = UNDERFLOW;
         return;
@@ -238,11 +241,19 @@ static void measure_with_adc(Result *result)
     // log("result %lu\n", result->data);
 }
 
-static void measure_with_comparator(Result *result) {}
+static void measure_with_comparator(Result *result)
+{
+
+}
 
 void measure_once(Result *result)
 {
     initialize_thresholds();
+    if (stable_voltage < STABLE_VOLTAGE_LOWER_DEADZONE) {
+        result->data = 0;
+        result->status = OVERFLOW;
+        return;
+    }
     if (range == COMPARATOR_RANGE)
     {
         measure_with_comparator(result);
