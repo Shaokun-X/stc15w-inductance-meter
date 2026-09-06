@@ -67,6 +67,7 @@
 static volatile __data unsigned char timer_overflow_count = 0;
 static volatile __data unsigned int pulse_count = 0;
 static volatile __data bool timer_flag = false;
+static bool measure_mutex = false;
 
 void measure_init(void)
 {
@@ -91,6 +92,12 @@ void measure_init(void)
 
 void measure_once(Result *result)
 {
+    if (measure_mutex)
+    {
+        return;
+    }
+    measure_mutex = true;
+
     TIMER_START();
     PCA_COUNTER_START();
     pulse_count = 0;
@@ -108,18 +115,20 @@ void measure_once(Result *result)
     {
         result->status = OVERFLOW;
         result->data = 0;
-        return;
     }
 
-    if (CF)
+    else if (CF)
     {
         result->status = UNDERFLOW;
         result->data = 0;
-        return;
+    }
+    else
+    {
+        result->status = OK;
+        result->data = pulse_count;
     }
 
-    result->status = OK;
-    result->data = pulse_count;
+    measure_mutex = false;
 }
 
 // void adc_isr(void) __interrupt(ADC_VECTOR)
