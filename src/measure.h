@@ -17,7 +17,8 @@ typedef struct {
 void measure_init(void);
 void measure_once(Result *result);
 
+void timer0_isr(void) __interrupt(TIMER0_VECTOR);
 // void adc_isr (void) __interrupt (ADC_VECTOR);
-// void timer0_isr(void) __interrupt(TIMER0_VECTOR);
+// void cmp_isr(void) __interrupt(COMPARATOR_VECTOR);
 
 #endif

@@ -2,12 +2,14 @@
 #include "gpio.h"
 #include "usart.h"
 
+#define BAUD_RATE 115200UL
+
 void debug_init(void)
 {
 #if DEBUG
     GPIO_INIT(P3, GPIO_Pin_0 | GPIO_Pin_1, GPIO_PullUp);
     /* The interrupt must be enabled so it can clear the TX busy flag. */
-    USART1_TIMER2_INIT(115200UL, ENABLE, ENABLE, PriorityLow,
+    USART1_TIMER2_INIT(BAUD_RATE, ENABLE, ENABLE, PriorityLow,
                        UART1_SW_P30_P31, DISABLE);
 #endif
 }
