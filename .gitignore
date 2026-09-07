@@ -57,3 +57,4 @@ venv
 .ruff_cache
 .agents
 skills-lock.json
+/**/**__pycache__
