@@ -111,6 +111,7 @@ void measure_once_with_filter(Result *result, KalmanFilter *filter)
     }
     else
     {
+        // reinitialize filter
         if (!filter->prediction && !filter->uncertainty)
         {
             filter->uncertainty = DEFAULT_INITIAL_UNCERTAINTY;

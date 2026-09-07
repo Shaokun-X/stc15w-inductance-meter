@@ -24,7 +24,10 @@ void main(void)
 
     while (true)
     {
-        delay_ms(200);
+        if (r.status != OK) {
+            f.uncertainty = 0;
+            f.prediction = 0;
+        }
         measure_once_with_filter(&r, &f);
         log("%d %lu\n", r.status, r.data);
     }

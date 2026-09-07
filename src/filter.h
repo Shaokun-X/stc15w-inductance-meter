@@ -7,11 +7,9 @@ typedef struct {
     unsigned int prediction;
 } KalmanFilter;
 
-// Since inductance usually doesn't change dramatically, the measure variance should be the main
-// contributor. Also the initial measurement should have a low uncertainty.
-#define PROCESS_VARIANCE (1U << 8)
-#define MEASUREMENT_VARIANCE (50U << 8)
-#define DEFAULT_INITIAL_UNCERTAINTY (1U << 8)
+#define PROCESS_VARIANCE 10000U
+#define MEASUREMENT_VARIANCE 20000U
+#define DEFAULT_INITIAL_UNCERTAINTY 5000U
 
 unsigned int update_filter(KalmanFilter* filter, unsigned int measurement);
 
