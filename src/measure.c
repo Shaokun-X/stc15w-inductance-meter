@@ -1,18 +1,10 @@
 #include "measure.h"
-#include "adc.h"
 #include "filter.h"
 #include "gpio.h"
 #include "pca.h"
 #include "timer.h"
 #include "cmp.h"
 #include "debug.h"
-
-// must match ADC_PIN_PIN
-#define ADC_CHANNEL ADC_CH3
-
-// must match ADC_CHANNEL, the PIN needs to be init as high z
-#define ADC_PIN_PIN P13
-#define ECI_PIN P12
 
 // Timer clock = 36 MHz / 12 = 3 MHz, 60,000 timer ticks = 20ms, 20ms * 5 = 100ms
 #define TIMER_VALUE_20MS 5536
@@ -24,19 +16,6 @@
 #define INDUCTOR_FREQUENCY_SCALE 3689274376UL
 #define INDUCTOR_FREQUENCY_OFFSET 5UL
 
-// must be ADC_RES_H2L8
-#define ADC_GET_RESULT() (((unsigned int)(ADC_RES & 0x03) << 8) | ADC_RESL)
-#define ADC_CONTR_IDLE_VALUE (0x80 | ADC_90T | ADC_CHANNEL)      /* 0xE1 */
-#define ADC_CONTR_START_VALUE (ADC_CONTR_IDLE_VALUE | ADC_START) /* 0xE9 */
-
-#define ADC_CLEAR_FLAG() (ADC_CONTR = ADC_CONTR_IDLE_VALUE)
-
-#define ADC_START_MEASUREMENT() (ADC_CONTR = ADC_CONTR_START_VALUE)
-
-#define ADC_WAIT_FOR_RESULT()                                                                      \
-    do                                                                                             \
-    {                                                                                              \
-    } while (!(ADC_CONTR & ADC_FLAG))
 #define TIMER_START()                                                                              \
     do                                                                                             \
     {                                                                                              \
@@ -75,23 +54,16 @@ static volatile __data bool timer_flag = false;
 
 void measure_init(void)
 {
-    // ADC & CCP, must match macro definitions
-    GPIO_INIT(P1, GPIO_Pin_1 | GPIO_Pin_3, GPIO_HighZ);
     // CMP positive input
     GPIO_INIT(P5, GPIO_Pin_5, GPIO_HighZ);
     // ECI & CMPO
     GPIO_INIT(P1, GPIO_Pin_2, GPIO_PullUp);
 
-    ADC_INIT(ADC_P11, ADC_90T, ENABLE, ADC_RES_H2L8, DISABLE, PriorityLow);
-
     TIMER0_INIT(TIM_16BitAutoReload, PriorityHigh, ENABLE, TIM_CLOCK_12T, DISABLE, TIMER_VALUE_20MS,
                 DISABLE);
     CMP_INIT(CMP_POSITIVE_P55, CMP_NEGATIVE_BANDGAP, CMP_INTERRUPT_NONE, CMP_OUTPUT_ENABLE,
              CMP_OUTPUT_NORMAL, CMP_FILTER_ENABLE, 0);
-    // PCA0_INIT(PCA_Mode_Capture, PCA_PWM_8bit, DISABLE, 0);
     PCA_COUNTER_INIT(PCA_P12_P11_P10_P37, PCA_Clock_ECI, DISABLE, PriorityLow);
-
-    // delay_ms(1);
 }
 
 /*
@@ -153,11 +125,6 @@ void measure_once_with_filter(Result *result, KalmanFilter *filter)
         result->status = OK;
     }
 }
-
-// void adc_isr(void) __interrupt(ADC_VECTOR)
-// {
-//     // log("%d\n", adc_result);
-// }
 
 void timer0_isr(void) __interrupt(TIMER0_VECTOR)
 {

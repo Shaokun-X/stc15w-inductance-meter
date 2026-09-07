@@ -209,7 +209,6 @@ DEP_FILE := $(OBJDIR)/dependencies.mk
 
 SRCS := \
 	$(VENDER_DIR)/delay.c \
-	$(VENDER_DIR)/adc.c \
 	$(VENDER_DIR)/usart.c \
 	$(SRC_DIR)/debug.c \
 	$(SRC_DIR)/measure.c \
