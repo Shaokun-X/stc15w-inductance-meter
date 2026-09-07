@@ -2,6 +2,7 @@
 #define	__MEASURE_H
 
 #include "config.h"
+#include "filter.h"
 
 enum ResultStatus {
     OK,
@@ -15,7 +16,7 @@ typedef struct {
 } Result;
 
 void measure_init(void);
-void measure_once(Result *result);
+void measure_once_with_filter(Result *result, KalmanFilter *filter);
 
 void timer0_isr(void) __interrupt(TIMER0_VECTOR);
 // void adc_isr (void) __interrupt (ADC_VECTOR);

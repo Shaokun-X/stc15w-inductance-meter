@@ -1,5 +1,6 @@
 #include "config.h"
 #include "delay.h"
+#include "filter.h"
 #include "gpio.h"
 #include "debug.h"
 #include "measure.h"
@@ -15,19 +16,18 @@ void main(void)
 
     debug_init();
     measure_init();
-    log("init \n");
 
     EA = 1;
 
     Result r = {0, 0};
+    KalmanFilter f = {0, 0};
 
     while (true)
     {
         delay_ms(200);
-        measure_once(&r);
+        measure_once_with_filter(&r, &f);
         log("%d %lu\n", r.status, r.data);
     }
 }
-
 
 

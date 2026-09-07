@@ -1,5 +1,6 @@
 #include "measure.h"
 #include "adc.h"
+#include "filter.h"
 #include "gpio.h"
 #include "pca.h"
 #include "timer.h"
@@ -18,6 +19,10 @@
 #define TIMER_OVERFLOW_COUNT_100MS 5
 
 #define PULSE_COUNT_OVERFLOW_THRESHOLD 100
+
+// calibrated constants in the relation L = A / (pulse_count)**2 + B
+#define INDUCTOR_FREQUENCY_SCALE 3689274376UL
+#define INDUCTOR_FREQUENCY_OFFSET 5UL
 
 // must be ADC_RES_H2L8
 #define ADC_GET_RESULT() (((unsigned int)(ADC_RES & 0x03) << 8) | ADC_RESL)
@@ -67,7 +72,6 @@
 static volatile __data unsigned char timer_overflow_count = 0;
 static volatile __data unsigned int pulse_count = 0;
 static volatile __data bool timer_flag = false;
-static bool measure_mutex = false;
 
 void measure_init(void)
 {
@@ -90,13 +94,24 @@ void measure_init(void)
     // delay_ms(1);
 }
 
-void measure_once(Result *result)
+/*
+ * Scale down everything by 8, so that numbers stay in the 32bit unsigned range
+ */
+static inline unsigned long pulse_count_to_uh(unsigned int pulse_count)
 {
-    if (measure_mutex)
+    unsigned long squared = (unsigned long)pulse_count * pulse_count;
+    unsigned long denominator = (squared + 4UL) >> 3;
+    if (denominator == 0)
     {
-        return;
+        return 0;
     }
-    measure_mutex = true;
+    // log("%lu\n", denominator);
+    // if INDUCTOR_FREQUENCY_OFFSET is negative, this expression needs to breakdown
+    return (INDUCTOR_FREQUENCY_SCALE + denominator / 2UL) / denominator + INDUCTOR_FREQUENCY_OFFSET;
+}
+
+void measure_once_with_filter(Result *result, KalmanFilter *filter)
+{
 
     TIMER_START();
     PCA_COUNTER_START();
@@ -110,7 +125,7 @@ void measure_once(Result *result)
 
     PCA_COUNTER_STOP();
 
-    // if there is not enough pulse the accuracy worsens
+    // if there is not enough pulse the accuracy degrades
     if (pulse_count <= PULSE_COUNT_OVERFLOW_THRESHOLD)
     {
         result->status = OVERFLOW;
@@ -124,11 +139,19 @@ void measure_once(Result *result)
     }
     else
     {
-        result->status = OK;
-        result->data = pulse_count;
-    }
+        if (!filter->prediction && !filter->uncertainty)
+        {
+            filter->uncertainty = DEFAULT_INITIAL_UNCERTAINTY;
+            filter->prediction = pulse_count;
+        }
+        else
+        {
+            update_filter(filter, pulse_count);
+        }
 
-    measure_mutex = false;
+        result->data = pulse_count_to_uh(filter->prediction);
+        result->status = OK;
+    }
 }
 
 // void adc_isr(void) __interrupt(ADC_VECTOR)

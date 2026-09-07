@@ -11,7 +11,7 @@ void main(void)
     {
         if (is_inductor_detected())
         {
-            measure_once();
+            measure_once_with_filter();
             filter_result();
         }
     }

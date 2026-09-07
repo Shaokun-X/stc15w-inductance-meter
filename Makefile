@@ -211,9 +211,9 @@ SRCS := \
 	$(VENDER_DIR)/delay.c \
 	$(VENDER_DIR)/adc.c \
 	$(VENDER_DIR)/usart.c \
-	$(VENDER_DIR)/pca.c \
 	$(SRC_DIR)/debug.c \
 	$(SRC_DIR)/measure.c \
+	$(SRC_DIR)/filter.c \
 	$(SRC_DIR)/main.c
 
 HEADERS := $(wildcard *.h $(VENDER_DIR)/*.h $(SRC_DIR)/*.h)
