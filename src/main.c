@@ -4,7 +4,6 @@
 #include "format.h"
 #include "measure.h"
 #include "debug.h"
-#include "stc15.h"
 
 void main(void)
 {
