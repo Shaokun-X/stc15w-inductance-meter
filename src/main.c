@@ -32,7 +32,7 @@ void main(void)
         measure_with_filter(&r, &f);
         if (r.status == UNDERFLOW)
         {
-            display_at_row(1, "Underflow", 0);
+            display_at_row(1, "Underflow (<10" DISPLAY_MU "H)", 0);
         }
         // else if (r.status == OVERFLOW)
         // {
@@ -40,10 +40,9 @@ void main(void)
         // }
         else
         {
-
             display_at_row(1, format_inductance(r.data), 0);
         }
-        // display_at_row(0, "hello display?", 0);
+        // display_at_row(1, "Underflow (<10" DISPLAY_MU "H)", 0);
         // log("%d %lu\n", r.status, r.data);
     }
 }
