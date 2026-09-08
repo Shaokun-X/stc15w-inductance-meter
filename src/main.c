@@ -4,7 +4,7 @@
 #include "format.h"
 #include "measure.h"
 #include "debug.h"
-
+#include "stc15.h"
 
 void main(void)
 {
@@ -23,15 +23,27 @@ void main(void)
     Result r = {0, 0};
     KalmanFilter f = {0, 0};
 
-    
     while (true)
     {
-        if (r.status != OK) {
+        if (r.status != OK)
+        {
             f.uncertainty = 0;
             f.prediction = 0;
         }
         measure_with_filter(&r, &f);
-        display_at_row(1, format_inductance(r.data), 0);
+        if (r.status == UNDERFLOW)
+        {
+            display_at_row(1, "No inductor", 0);
+        }
+        else if (r.status == OVERFLOW)
+        {
+            display_at_row(1, "Overflow", 0);
+        }
+        else
+        {
+
+            display_at_row(1, format_inductance(r.data), 0);
+        }
         // display_at_row(0, "hello display?", 0);
         // log("%d %lu\n", r.status, r.data);
     }
