@@ -1,5 +1,4 @@
 #include "config.h"
-#include "delay.h"
 #include "filter.h"
 #include "gpio.h"
 #include "debug.h"
@@ -11,8 +10,8 @@ void main(void)
     EA = 0;
 
     // led
-    GPIO_INIT(P3, GPIO_Pin_2, GPIO_OUT_PP);
-    P32 = 0;
+    // GPIO_INIT(P3, GPIO_Pin_2, GPIO_OUT_PP);
+    // P32 = 0;
 
     debug_init();
     measure_init();
