@@ -4,7 +4,7 @@
 #include <stdio.h> // IWYU pragma: keep
 #include "config.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG
     #define log(...) printf(__VA_ARGS__)
 #else

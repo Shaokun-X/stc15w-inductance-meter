@@ -33,12 +33,12 @@ void main(void)
         measure_with_filter(&r, &f);
         if (r.status == UNDERFLOW)
         {
-            display_at_row(1, "No inductor", 0);
+            display_at_row(1, "Underflow", 0);
         }
-        else if (r.status == OVERFLOW)
-        {
-            display_at_row(1, "Overflow", 0);
-        }
+        // else if (r.status == OVERFLOW)
+        // {
+        //     display_at_row(1, "Overflow", 0);
+        // }
         else
         {
 
