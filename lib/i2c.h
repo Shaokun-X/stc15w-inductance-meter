@@ -5,19 +5,19 @@
 
 /* Configure each line with its GPIO port number and pin number. */
 #ifndef I2C_SDA_PORT
-#define I2C_SDA_PORT 2
+#define I2C_SDA_PORT 3
 #endif
 
 #ifndef I2C_SDA_PIN
-#define I2C_SDA_PIN 0
+#define I2C_SDA_PIN 2
 #endif
 
 #ifndef I2C_SCL_PORT
-#define I2C_SCL_PORT 2
+#define I2C_SCL_PORT 3
 #endif
 
 #ifndef I2C_SCL_PIN
-#define I2C_SCL_PIN 1
+#define I2C_SCL_PIN 3
 #endif
 
 /*

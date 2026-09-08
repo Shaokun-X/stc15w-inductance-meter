@@ -212,6 +212,7 @@ SRCS := \
 	$(VENDER_DIR)/i2c.c \
 	$(VENDER_DIR)/usart.c \
 	$(SRC_DIR)/debug.c \
+	$(SRC_DIR)/display.c \
 	$(SRC_DIR)/measure.c \
 	$(SRC_DIR)/filter.c \
 	$(SRC_DIR)/main.c

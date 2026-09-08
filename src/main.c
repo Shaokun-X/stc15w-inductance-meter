@@ -1,8 +1,8 @@
 #include "config.h"
 #include "filter.h"
-#include "gpio.h"
-#include "debug.h"
+#include "display.h"
 #include "measure.h"
+#include "debug.h"
 
 
 void main(void)
@@ -15,12 +15,14 @@ void main(void)
 
     debug_init();
     measure_init();
+    display_init();
 
     EA = 1;
 
     Result r = {0, 0};
     KalmanFilter f = {0, 0};
 
+    
     while (true)
     {
         if (r.status != OK) {
@@ -28,6 +30,7 @@ void main(void)
             f.prediction = 0;
         }
         measure_once_with_filter(&r, &f);
+        display_text("Hello world");
         log("%d %lu\n", r.status, r.data);
     }
 }
