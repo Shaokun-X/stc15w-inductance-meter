@@ -6,8 +6,7 @@
 
 void display_init(void);
 void display_clear(void);
-void display_top(const char *text, unsigned char offset);
-void display_bottom(const char *text, unsigned char offset);
+void display_at_row(unsigned char row, const char *text, unsigned char offset);
 void display_text(const char *text);
 
 #endif

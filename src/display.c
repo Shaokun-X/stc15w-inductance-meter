@@ -7,13 +7,12 @@
 #define SSD1306_ADDRESS_SECONDARY 0x3d
 #define SSD1306_CONTROL_COMMAND 0x00
 #define SSD1306_CONTROL_DATA 0x40
-#define SSD1306_WIDTH 128
 #define SSD1306_PAGES 4
 #define DISPLAY_COLUMNS 21
 
 static unsigned char display_address = SSD1306_ADDRESS_PRIMARY;
 
-static const __code unsigned char font[97][5] = {
+static const __code unsigned char font[96][5] = {
     {0x00,0x00,0x00,0x00,0x00}, {0x00,0x00,0x5f,0x00,0x00},
     {0x00,0x07,0x00,0x07,0x00}, {0x14,0x7f,0x14,0x7f,0x14},
     {0x24,0x2a,0x7f,0x2a,0x12}, {0x23,0x13,0x08,0x64,0x62},
@@ -61,7 +60,7 @@ static const __code unsigned char font[97][5] = {
     {0x44,0x28,0x10,0x28,0x44}, {0x0c,0x50,0x50,0x50,0x3c},
     {0x44,0x64,0x54,0x4c,0x44}, {0x00,0x08,0x36,0x41,0x00},
     {0x00,0x00,0x7f,0x00,0x00}, {0x00,0x41,0x36,0x08,0x00},
-    {0x10,0x08,0x08,0x10,0x08}, {0x00,0x06,0x09,0x09,0x06},
+    {0x10,0x08,0x08,0x10,0x08},
     {0xfc,0x40,0x40,0x20,0x7c}
 };
 
@@ -113,25 +112,13 @@ static void display_command_pair(unsigned char command, unsigned char value)
 
 static void display_set_position(unsigned char page, unsigned char column)
 {
-    display_command(0xb0 | page);
-    display_command(0x00 | (column & 0x0f));
-    display_command(0x10 | (column >> 4));
-}
-
-static void display_clear_page(unsigned char page)
-{
-    unsigned char column;
-
-    display_set_position(page, 0);
-    if (!display_begin(SSD1306_CONTROL_DATA))
+    if (display_begin(SSD1306_CONTROL_COMMAND))
     {
-        return;
+        i2c_write_byte(0xb0 | page);
+        i2c_write_byte(0x00 | (column & 0x0f));
+        i2c_write_byte(0x10 | (column >> 4));
+        i2c_stop();
     }
-    for (column = 0; column < SSD1306_WIDTH; column++)
-    {
-        i2c_write_byte(0x00);
-    }
-    i2c_stop();
 }
 
 static void display_write_character(char character)
@@ -142,9 +129,9 @@ static void display_write_character(char character)
 
     if (code == DISPLAY_CHAR_MU)
     {
-        index = 96;
+        index = 95;
     }
-    else if (code < ' ' || code > 0x7f)
+    else if (code < ' ' || code > '~')
     {
         index = '?' - ' ';
     }
@@ -159,27 +146,46 @@ static void display_write_character(char character)
     i2c_write_byte(0x00);
 }
 
-static void display_row(unsigned char page, const char *text, unsigned char offset)
+static const char *display_write_page(unsigned char page, const char *text, unsigned char offset)
 {
-    unsigned char position = offset;
+    unsigned char position;
 
-    display_clear_page(page);
-    if (text == 0 || offset >= DISPLAY_COLUMNS)
-    {
-        return;
-    }
-
-    display_set_position(page, offset * 6);
+    display_set_position(page, 0);
     if (!display_begin(SSD1306_CONTROL_DATA))
     {
+        return text;
+    }
+
+    for (position = 0; position < DISPLAY_COLUMNS; position++)
+    {
+        if (position >= offset && *text != '\0' && *text != '\n')
+        {
+            display_write_character(*text++);
+        }
+        else
+        {
+            display_write_character(' ');
+        }
+    }
+    i2c_write_byte(0x00);
+    i2c_write_byte(0x00);
+    i2c_stop();
+
+    if (*text == '\n')
+    {
+        text++;
+    }
+    return text;
+}
+
+void display_at_row(unsigned char row, const char *text, unsigned char offset)
+{
+    if (row >= SSD1306_PAGES)
+    {
         return;
     }
-    while (*text != '\0' && *text != '\n' && position < DISPLAY_COLUMNS)
-    {
-        display_write_character(*text++);
-        position++;
-    }
-    i2c_stop();
+
+    display_write_page(row, text, offset);
 }
 
 void display_init(void)
@@ -221,46 +227,16 @@ void display_clear(void)
 
     for (page = 0; page < SSD1306_PAGES; page++)
     {
-        display_clear_page(page);
+        display_write_page(page, "", 0);
     }
-}
-
-void display_top(const char *text, unsigned char offset)
-{
-    display_row(0, text, offset);
-}
-
-void display_bottom(const char *text, unsigned char offset)
-{
-    display_row(1, text, offset);
 }
 
 void display_text(const char *text)
 {
-    unsigned char page = 0;
-    unsigned char position;
+    unsigned char page;
 
-    display_clear();
-    while (text != 0 && *text != '\0' && page < SSD1306_PAGES)
+    for (page = 0; page < SSD1306_PAGES; page++)
     {
-        display_set_position(page, 0);
-        if (!display_begin(SSD1306_CONTROL_DATA))
-        {
-            return;
-        }
-
-        position = 0;
-        while (*text != '\0' && *text != '\n' && position < DISPLAY_COLUMNS)
-        {
-            display_write_character(*text++);
-            position++;
-        }
-        i2c_stop();
-
-        if (*text == '\n')
-        {
-            text++;
-        }
-        page++;
+        text = display_write_page(page, text, 0);
     }
 }

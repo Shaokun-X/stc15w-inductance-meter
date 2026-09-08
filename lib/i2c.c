@@ -3,7 +3,7 @@
 #include "delay.h"
 #include "stc15.h"
 
-#define I2C_HALF_PERIOD_US 5
+#define I2C_HALF_PERIOD_US 2
 #define I2C_PIN_(port, pin) P##port##pin
 #define I2C_PIN(port, pin) I2C_PIN_(port, pin)
 #define I2C_MODE0_(port) P##port##M0
