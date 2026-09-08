@@ -16,7 +16,7 @@ typedef struct {
 } Result;
 
 void measure_init(void);
-void measure_once_with_filter(Result *result, KalmanFilter *filter);
+void measure_with_filter(Result *result, KalmanFilter *filter);
 
 void timer0_isr(void) __interrupt(TIMER0_VECTOR);
 // void adc_isr (void) __interrupt (ADC_VECTOR);

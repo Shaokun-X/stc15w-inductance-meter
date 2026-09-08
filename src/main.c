@@ -1,6 +1,7 @@
 #include "config.h"
 #include "filter.h"
 #include "display.h"
+#include "format.h"
 #include "measure.h"
 #include "debug.h"
 
@@ -29,10 +30,9 @@ void main(void)
             f.uncertainty = 0;
             f.prediction = 0;
         }
-        measure_once_with_filter(&r, &f);
-        display_text("Hello world");
-        log("%d %lu\n", r.status, r.data);
+        measure_with_filter(&r, &f);
+        display_at_row(1, format_inductance(r.data), 0);
+        // display_at_row(0, "hello display?", 0);
+        // log("%d %lu\n", r.status, r.data);
     }
 }
-
-

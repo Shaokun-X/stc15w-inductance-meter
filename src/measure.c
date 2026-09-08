@@ -82,7 +82,7 @@ static inline unsigned long pulse_count_to_uh(unsigned int pulse_count)
     return (INDUCTOR_FREQUENCY_SCALE + denominator / 2UL) / denominator + INDUCTOR_FREQUENCY_OFFSET;
 }
 
-void measure_once_with_filter(Result *result, KalmanFilter *filter)
+void measure_with_filter(Result *result, KalmanFilter *filter)
 {
 
     TIMER_START();
