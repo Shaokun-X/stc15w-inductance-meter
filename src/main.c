@@ -4,6 +4,7 @@
 #include "format.h"
 #include "measure.h"
 #include "debug.h"
+#include "wdt.h"
 
 void main(void)
 {
@@ -16,6 +17,7 @@ void main(void)
     debug_init();
     measure_init();
     display_init();
+    WDT_INIT(WDT_STOP_IN_IDLE, WDT_PRESCALER_32);
 
     EA = 1;
 
@@ -44,5 +46,6 @@ void main(void)
         }
         // display_at_row(1, "Underflow (<10" DISPLAY_MU "H)", 0);
         // log("%d %lu\n", r.status, r.data);
+        WDT_FEED();
     }
 }
