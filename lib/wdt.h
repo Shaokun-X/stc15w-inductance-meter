@@ -36,6 +36,15 @@
 	WDT_CONTR |= WDT_FEED_MASK; \
 } while (0)
 
+/*
+ * Attempt to stop the watchdog without changing its configuration.
+ * On STC15 variants where EN_WDT cannot be cleared after being set, this has
+ * no effect; feed the watchdog during long operations instead.
+ */
+#define WDT_STOP() do { \
+	WDT_CONTR &= ~WDT_ENABLE_MASK; \
+} while (0)
+
 /* WDT_RESET_OCCURRED() remains true until the flag is cleared explicitly. */
 #define WDT_RESET_OCCURRED() \
 	((WDT_CONTR & WDT_RESET_FLAG_MASK) != 0)
