@@ -16,6 +16,10 @@
 // in ms, the period when the button must be released to finally power off
 #define SHUTDOWN_BUTTON_RELEASE_WAIT_TIME 600U
 
+// measure_with_filter() takes approximately 100 ms per measurement
+#define AUTO_SHUTDOWN_UNCHANGED_LOOP_COUNT 1800U // 3min
+#define AUTO_SHUTDOWN_CONFIRM_LOOP_COUNT 50U // 5s
+
 enum PowerState
 {
     RUNNING,
@@ -23,8 +27,22 @@ enum PowerState
     POWER_OFF,
 };
 
-__data unsigned int btn_high_loop_count = 0;
-__data enum PowerState power_state = RUNNING;
+enum AutoShutdownState
+{
+    AUTO_SHUTDOWN_TRACKING,
+    AUTO_SHUTDOWN_WARNING,
+    AUTO_SHUTDOWN_POWER_OFF,
+};
+
+static __data Result r = {0, 0};
+static __data KalmanFilter f = {0, 0};
+static __data Result previous_result = {0, 0};
+static __data unsigned int btn_high_loop_count = 0;
+static __data enum PowerState power_state = RUNNING;
+static __data unsigned int unchanged_loop_count = 0;
+static __data unsigned char auto_shutdown_confirm_loop_count = 0;
+static __data bool has_previous_measurement = false;
+static __data enum AutoShutdownState auto_shutdown_state = AUTO_SHUTDOWN_TRACKING;
 
 enum PowerState handle_long_press_shutdown(void)
 {
@@ -49,6 +67,64 @@ enum PowerState handle_long_press_shutdown(void)
     return RUNNING;
 }
 
+static void reset_auto_shutdown(void)
+{
+    unchanged_loop_count = 0;
+    auto_shutdown_confirm_loop_count = 0;
+    auto_shutdown_state = AUTO_SHUTDOWN_TRACKING;
+}
+
+static void cancel_auto_shutdown_on_button_press(void)
+{
+    if (auto_shutdown_state == AUTO_SHUTDOWN_WARNING && !BTN_PIN)
+    {
+        reset_auto_shutdown();
+    }
+}
+
+static void update_auto_shutdown(const Result *result)
+{
+    bool measurement_changed;
+
+    measurement_changed = !has_previous_measurement || result->status != previous_result.status ||
+                          result->data != previous_result.data;
+    previous_result = *result;
+    has_previous_measurement = true;
+
+    if (measurement_changed)
+    {
+        reset_auto_shutdown();
+    }
+    else if (auto_shutdown_state == AUTO_SHUTDOWN_WARNING)
+    {
+        auto_shutdown_confirm_loop_count++;
+        if (auto_shutdown_confirm_loop_count >= AUTO_SHUTDOWN_CONFIRM_LOOP_COUNT)
+        {
+            auto_shutdown_state = AUTO_SHUTDOWN_POWER_OFF;
+        }
+    }
+    else
+    {
+        unchanged_loop_count++;
+        if (unchanged_loop_count >= AUTO_SHUTDOWN_UNCHANGED_LOOP_COUNT)
+        {
+            auto_shutdown_confirm_loop_count = 0;
+            auto_shutdown_state = AUTO_SHUTDOWN_WARNING;
+        }
+    }
+}
+
+static void power_off(void)
+{
+    display_at_row(1, "Powering off...", 0);
+    delay_ms(SHUTDOWN_BUTTON_RELEASE_WAIT_TIME);
+    display_clear();
+    LATCH_PIN = LOW;
+    while (1)
+    {
+    }
+}
+
 void main(void)
 {
     LATCH_PIN = HIGH;
@@ -63,13 +139,26 @@ void main(void)
 
     EA = 1;
 
-    Result r = {0, 0};
-    KalmanFilter f = {0, 0};
-
     while (true)
     {
         power_state = handle_long_press_shutdown();
-        if (power_state == RUNNING)
+        cancel_auto_shutdown_on_button_press();
+        if (auto_shutdown_state == AUTO_SHUTDOWN_POWER_OFF)
+        {
+            power_state = POWER_OFF;
+        }
+
+        if (power_state == POWER_OFF)
+        {
+            power_off();
+        }
+        else if (power_state == CONFIRMING)
+        {
+            display_at_row(1, "Hold to power off", 0);
+            // each loop should take roughly 100ms
+            delay_ms(100);
+        }
+        else
         {
             if (r.status != OK)
             {
@@ -77,7 +166,13 @@ void main(void)
                 f.prediction = 0;
             }
             measure_with_filter(&r, &f);
-            if (r.status == UNDERFLOW)
+            update_auto_shutdown(&r);
+
+            if (auto_shutdown_state != AUTO_SHUTDOWN_TRACKING)
+            {
+                display_at_row(1, "Power off in 5s", 0);
+            }
+            else if (r.status == UNDERFLOW)
             {
                 display_at_row(1, "Underflow (<10" DISPLAY_MU "H)", 0);
             }
@@ -88,24 +183,5 @@ void main(void)
             // display_at_row(1, "Underflow (<10" DISPLAY_MU "H)", 0);
             // log("%d %lu\n", r.status, r.data);
         }
-        else if (power_state == CONFIRMING)
-        {
-            display_at_row(1, "Hold to power off", 0);
-            // each loop should take roughly 100ms
-            delay_ms(100);
-        }
-        else
-        {
-            display_at_row(1, "Powering off...", 0);
-            delay_ms(SHUTDOWN_BUTTON_RELEASE_WAIT_TIME);
-            display_clear();
-            LATCH_PIN = LOW;
-            // MCU_POWER_DOWN();
-            while (1)
-            {
-            }
-        }
-
-        // WDT_FEED();
     }
 }
