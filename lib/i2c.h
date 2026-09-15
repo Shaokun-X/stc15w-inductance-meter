@@ -9,7 +9,7 @@
 #endif
 
 #ifndef I2C_SDA_PIN
-#define I2C_SDA_PIN 0
+#define I2C_SDA_PIN 1
 #endif
 
 #ifndef I2C_SCL_PORT
@@ -17,7 +17,7 @@
 #endif
 
 #ifndef I2C_SCL_PIN
-#define I2C_SCL_PIN 1
+#define I2C_SCL_PIN 0
 #endif
 
 /*
